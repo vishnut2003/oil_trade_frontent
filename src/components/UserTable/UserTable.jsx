@@ -40,11 +40,11 @@ const UserTable = () => {
           <FontAwesomeIcon icon={faRotateLeft} />
         </button>
       </div>
-      <div className='max-w-max overflow-auto'>
-        <table className="w-full text-md bg-white shadow-md rounded mb-4">
-          <tbody>
+      <div className='md:max-w-max w-full'>
+        <table className="w-full text-md md:bg-white md:shadow-md rounded mb-4">
+          <tbody className='w-full flex flex-wrap gap-3 md:table-row-group'>
 
-            <tr className="border-b">
+            <tr className="border-b hidden md:table-row">
               <th className="text-left p-3 px-5">Name</th>
               <th className="text-left p-3 px-5">Username</th>
               <th className="text-left p-3 px-5">Email</th>
@@ -54,12 +54,15 @@ const UserTable = () => {
 
             {
               users.map((user) => (
-                <tr className="border-b hover:bg-orange-100 " key={user._id}>
-                  <td className="p-3 px-5">{user.name}</td>
-                  <td className="p-3 px-5">{user.username}</td>
-                  <td className="p-3 px-5">{user.email}</td>
-                  <td className="p-3 px-5">{user.role}</td>
-                  <td className="p-3 px-5 flex justify-end">
+                <tr 
+                className="border-b hover:bg-orange-100 flex flex-col md:table-row m-1 p-3 md:m-0 md:p-0 bg-white shadow-md md:shadow-none w-full" 
+                key={user._id}
+                >
+                  <td className="p-2 md:py-3 md:px-5">{user.name}</td>
+                  <td className="p-2 md:py-3 md:px-5">{user.username}</td>
+                  <td className="p-2 md:py-3 md:px-5">{user.email}</td>
+                  <td className="p-2 md:py-3 md:px-5">{user.role}</td>
+                  <td className="p-2 md:py-3 md:px-5 flex justify-start">
                     <button type="button" className="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">Edit</button>
                     <button
                       type="button"

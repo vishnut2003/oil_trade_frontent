@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCartShopping, faChartLine, faGauge, faPercentage, faRightFromBracket, faSquarePollVertical, faUserTie } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faCartShopping, faChartLine, faGauge, faPercentage, faRightFromBracket, faSquarePollVertical, faUserTie, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { faCalendar, faUser } from '@fortawesome/free-regular-svg-icons';
 import { faProductHunt } from '@fortawesome/free-brands-svg-icons';
 
@@ -63,22 +63,52 @@ const Sidebar = () => {
 
   const pathname = usePathname()
 
+  const [sidebar, setSidebar] = useState(false)
 
   return (
-    <div className='flex flex-col gap-10 justify-between h-full'>
+    <div className={
+      sidebar ? 'fixed md:static flex flex-col gap-10 justify-between min-w-60 h-screen max-h-screen shadow-xl p-4 overflow-auto bg-white transition-all z-10' :
+        'static flex flex-col gap-10 justify-between min-w-0 md:min-w-60 w-10 h-screen max-h-screen shadow-xl md:p-4 overflow-hidden bg-white transition-all z-10'
+    }>
       <div className='flex gap-2 items-center'>
-        <div className='bg-blue-600 w-10 p-2 rounded-md'>
+        <div className={
+          sidebar ? 'bg-blue-600 w-7 p-1 rounded-md' :
+            'bg-blue-600 w-7 p-1 rounded-md hidden md:flex'
+        }>
           <img src="/dashboard-icons/database-icon.png" width={100} />
         </div>
-        <h2 className='text-3xl font-bold'>Oil Trade</h2>
+        <h2
+          className={
+            sidebar ? 'text-2xl font-bold' :
+              'text-2xl font-bold hidden md:flex'
+          }
+        >CMS</h2>
+        <div
+        className={`w-full flex ${sidebar ? 'justify-end' : 'justify-center mt-3'}`}
+          onClick={() => {
+            setSidebar(!sidebar)
+          }}
+        >
+          <FontAwesomeIcon icon={sidebar ? faXmark : faBars} width={25} className={'text-blue-600 md:hidden'} />
+        </div>
       </div>
       <div>
-        <ul className='flex flex-col gap-3'>
+        <ul
+          className={
+            sidebar ? 'flex flex-col gap-3' :
+              'flex-col gap-3 hidden md:flex'
+          }
+        >
 
           {
             sidebarLinks.map((menu) => (
               <li key={menu.id} className='cursor-pointer bg-white text-slate-600'>
-                <Link href={menu.path}>
+                <Link
+                  href={menu.path}
+                  onClick={() => {
+                    setSidebar(!sidebar)
+                  }}
+                >
                   <div className={pathname === menu.path ? 'flex items-center gap-3 px-5 py-3 bg-blue-600 shadow-md shadow-blue-600/50  text-white rounded-md' : 'flex items-center gap-3 px-5 py-3 bg-white text-slate-600 rounded-md'}>
                     <FontAwesomeIcon icon={menu.icon} width={14} />
                     <span>{menu.title}</span>
@@ -90,7 +120,12 @@ const Sidebar = () => {
 
         </ul>
       </div>
-      <div className='flex items-center gap-3 p-3 text-slate-600 cursor-pointer'>
+      <div
+        className={
+          sidebar ? 'flex items-center gap-3 p-3 text-slate-600 cursor-pointer' :
+            'hidden md:flex items-center gap-3 p-3 text-slate-600 cursor-pointer'
+        }
+      >
         <FontAwesomeIcon icon={faRightFromBracket} width='17px' />
         <p>Log Out</p>
       </div>
