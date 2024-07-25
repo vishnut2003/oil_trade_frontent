@@ -1,8 +1,7 @@
 'use client';
 
-import EditProduct from '@/components/EditProduct/EditProduct';
 import domainName from '@/domainName';
-import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faAngleDown, faCheck, faCircleExclamation, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
@@ -19,6 +18,12 @@ const Products = () => {
   const [createProductSuccess, setCreateProductSuccess] = useState('')
   const [createProductLoading, setCreateProductLoading] = useState(false)
   const [productLists, setProductsList] = useState([])
+
+  // Product Edition section
+  const [productsEdited, setProductsEdited] = useState({})
+  const [productsEditLoading, setProductsEditLoading] = useState({})
+  const [productsEditSuccess, setProductsEditSuccess] = useState({})
+  const [productPrevDetails, setProductPrevDetails] = useState({})
 
   useEffect(() => {
     getAllProducts()
@@ -65,13 +70,14 @@ const Products = () => {
       <div className='bg-white p-3 mb-2 rounded-md shadow-sm flex flex-col gap-4 lg:max-w-2xl'>
         <h2 className='text-slate-800 font-semibold text-lg'>Product data</h2>
         <div className='flex justify-between gap-3 flex-col md:flex-row'>
-          <input
+          {/* <input
             type="date"
             value={curDate}
             onChange={(e) => {
               setCurDate(e.target.value)
+              ajaxDateFilter(e)
             }}
-            className='py-2 px-4 text-sm rounded-md shadow-md shadow-slate-200' />
+            className='py-2 px-4 text-sm rounded-md shadow-md shadow-slate-200' /> */}
           <input type="text" placeholder='Search product' className='py-2 px-4 text-sm rounded-md shadow-md shadow-slate-200' />
         </div>
         <div>
@@ -82,15 +88,115 @@ const Products = () => {
             {/* Table row */}
             {
               productLists.map((product, index) => (
-                <div key={index} className='flex justify-between items-center px-5 py-2 border-b border-slate-100  hover:bg-blue-50'>
-                  <div>
-                    <h3 className='text-sm'>{product.name}</h3>
+                <div className='flex flex-col'>
+                  <div key={index} className='flex gap-2 justify-between items-center px-5 py-2 border-b border-slate-100  hover:bg-blue-50 w-full'>
+                    <div className='grow'>
+                      <h3 className='text-sm'>
+                        <input
+                          type="text"
+                          value={productsEdited[product._id] ? productsEdited[product._id].name : product.name}
+                          onChange={(e) => {
+                            setProductsEdited({
+                              ...productsEdited,
+                              [product._id]: {
+                                ...productsEdited[product._id],
+                                name: e.target.value,
+                                id: product._id
+                              }
+                            })
+                          }}
+                          className='bg-transparent text-sm py-1'
+                        />
+                        <p
+                          onClick={() => {
+                            setProductPrevDetails({
+                              ...productPrevDetails,
+                              [product._id]: productPrevDetails[product._id] === false || undefined ? true : false
+                            })
+                          }}
+                          className='text-xs text-blue-600 cursor-pointer'>Previous Price <FontAwesomeIcon icon={faAngleDown} width={10} /></p>
+                      </h3>
+                    </div>
+                    <div className='flex gap-3 items-center'>
+                      <p
+                        className='text-sm text-slate-500 font-semibold'
+                      ><input
+                          type="number"
+                          className='max-w-16'
+                          value={productsEdited[product._id] ? productsEdited[product._id].price : product.price}
+                          onChange={(e) => {
+                            setProductsEdited({
+                              ...productsEdited,
+                              [product._id]: {
+                                ...productsEdited[product._id],
+                                price: e.target.value,
+                                id: product._id
+                              }
+                            })
+                          }}
+                        /> &#8377; / Unit</p>
+                      <button
+                        onClick={() => {
+                          const confirm = window.confirm('Please confirm to updating the Product details')
+                          if (confirm) {
+                            setProductsEditLoading({
+                              ...productsEditLoading,
+                              [product._id]: true
+                            })
+                            axios.post(`${server}/products/edit-single`, productsEdited[product._id])
+                              .then((res) => {
+                                setProductsEditLoading({
+                                  ...productsEditLoading,
+                                  [product._id]: false
+                                })
+
+                                setProductsEditSuccess({
+                                  ...productsEditSuccess,
+                                  [product._id]: true
+                                })
+
+                                getAllProducts()
+
+                                setTimeout(() => {
+                                  setProductsEditSuccess({
+                                    ...productsEditSuccess,
+                                    [product._id]: false
+                                  })
+                                }, 5000)
+
+                                window.alert(res.data)
+                              })
+                              .catch((err) => {
+                                setProductsEditLoading({
+                                  ...productsEditLoading,
+                                  [product._id]: false
+                                })
+
+                                window.alert(err.code)
+                              })
+                          } else return
+                        }}
+                        className='px-4 py-2 bg-blue-600 text-white shadow-md shadow-blue-600/50 rounded-md text-xs flex items-center gap-2'>
+                        {
+                          productsEditLoading[product._id] &&
+                          <div className='h-2 w-2 rounded-full border border-white border-r-0 border-b-0 animate-spin'></div>
+                        }
+                        {
+                          productsEditSuccess[product._id] &&
+                          <FontAwesomeIcon icon={faCheck} width={10} />
+                        }
+                        Save</button>
+                    </div>
                   </div>
-                  <div className='flex gap-3 items-center'>
-                    <p
-                      className='text-sm text-slate-500 font-semibold'
-                    ><input type="number" className='max-w-16' defaultValue={product.price}/> &#8377; / Unit</p>
-                    <button className='px-4 py-2 bg-blue-600 text-white shadow-md shadow-blue-600/50 rounded-md text-xs'>Edit</button>
+                  <div className={'p-2'}>
+                    {
+                      <div className={`max-h-52 transition-all ${productPrevDetails[product._id] ? 'h-full p-3 opacity-100' : 'h-0 opacity-0'} overflow-auto border border-slate-100 rounded-md shadow-md`}>
+                        <ul>
+                          <li>Hello</li>
+                          <li>Hello</li>
+                        </ul>
+                      </div>
+                    }
                   </div>
                 </div>
               ))
