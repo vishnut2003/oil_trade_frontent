@@ -1,7 +1,7 @@
 'use client';
 
 import domainName from '@/domainName';
-import { faAngleDown, faCheck, faCircleExclamation, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faAngleDown, faAngleLeft, faAngleRight, faCheck, faCircleExclamation, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
@@ -24,6 +24,10 @@ const Products = () => {
   const [productsEditLoading, setProductsEditLoading] = useState({})
   const [productsEditSuccess, setProductsEditSuccess] = useState({})
   const [productPrevDetails, setProductPrevDetails] = useState({})
+  const [productSearch, setProductSearch] = useState('')
+  const [productPaginationPos, setProductPaginationPos] = useState(1)
+  const [productsPerPage, setProductsPerPage] = useState(4)
+  const [lastPaginationPos, setLastPaginationPo] = useState(0)
 
   useEffect(() => {
     getAllProducts()
@@ -34,6 +38,8 @@ const Products = () => {
     axios.get(`${server}/products/all`)
       .then((res) => {
         setProductsList(res.data)
+        const lastPagePos = res.data.length / (productsPerPage + 1)
+        setLastPaginationPo(Math.ceil(lastPagePos))
       })
       .catch((err) => {
         console.log(err)
@@ -70,15 +76,14 @@ const Products = () => {
       <div className='bg-white p-3 mb-2 rounded-md shadow-sm flex flex-col gap-4 lg:max-w-2xl'>
         <h2 className='text-slate-800 font-semibold text-lg'>Product data</h2>
         <div className='flex justify-between gap-3 flex-col md:flex-row'>
-          {/* <input
-            type="date"
-            value={curDate}
+          <input
+            type="text"
+            value={productSearch}
             onChange={(e) => {
-              setCurDate(e.target.value)
-              ajaxDateFilter(e)
+              setProductSearch(e.target.value)
             }}
-            className='py-2 px-4 text-sm rounded-md shadow-md shadow-slate-200' /> */}
-          <input type="text" placeholder='Search product' className='py-2 px-4 text-sm rounded-md shadow-md shadow-slate-200' />
+            placeholder='Search product'
+            className='py-2 px-4 text-sm rounded-md shadow-md shadow-slate-200' />
         </div>
         <div>
 
@@ -87,9 +92,21 @@ const Products = () => {
 
             {/* Table row */}
             {
-              productLists.map((product, index) => (
-                <div className='flex flex-col'>
-                  <div key={index} className='flex gap-2 justify-between items-center px-5 py-2 border-b border-slate-100  hover:bg-blue-50 w-full'>
+              productLists.filter((product) => {
+                const productName = product.name.toLowerCase()
+                const searchText = productSearch.toLowerCase()
+                if (productName.includes(searchText) || !productSearch) {
+                  return product
+                }
+              }).filter((products, index) => {
+                const start = productPaginationPos === 1 ? 0 : ((productPaginationPos - 1) * productsPerPage) + 1
+                const end = productPaginationPos === 1 ? productsPerPage - 1 : productPaginationPos * productsPerPage
+                if (index >= start && index <= end + 1) {
+                  return products
+                }
+              }).map((product, index) => (
+                <div key={index} className='flex flex-col'>
+                  <div className='flex gap-2 justify-between items-center px-5 py-2 border-b border-slate-100  hover:bg-blue-50 w-full'>
                     <div className='grow'>
                       <h3 className='text-sm'>
                         <input
@@ -188,13 +205,51 @@ const Products = () => {
                         Save</button>
                     </div>
                   </div>
-                  <div className={'p-2'}>
+                  <div className={productPrevDetails[product._id] ? 'p-2' : ''}>
                     {
-                      <div className={`max-h-52 transition-all ${productPrevDetails[product._id] ? 'h-full p-3 opacity-100' : 'h-0 opacity-0'} overflow-auto border border-slate-100 rounded-md shadow-md`}>
-                        <ul>
-                          <li>Hello</li>
-                          <li>Hello</li>
-                        </ul>
+                      <div className={`max-h-96 transition-all ${productPrevDetails[product._id] ? 'h-full p-3 opacity-100' : 'h-0 opacity-0'} overflow-auto border border-slate-100 rounded-md shadow-md`}>
+                        <div className='border-b border-slate-100 pb-2 flex flex-nowrap justify-between items-center'>
+                          {product.prevPrice.filter((priceDetail) => priceDetail.startPrice && priceDetail).map((startPrice, index) => (
+                            <div className='flex flex-col gap-1' key={index}>
+                              <p className='text-sm'>Start price: <b>&#8377; {startPrice.price}</b></p>
+                              <p className='text-xs text-slate-500'>{startPrice.date.split(' ')[0].split('-').join('/')} Time: {startPrice.date.split(' ')[1].split('_').join(' ')}</p>
+                            </div>
+                          ))}
+                          <div>
+                            <input
+                              type="date"
+                              value={curDate}
+                              onChange={(e) => {
+                                setCurDate(e.target.value)
+                              }}
+                              className='text-sm text-slate-600 py-1 px-2 shadow-md rounded-md' />
+                          </div>
+                        </div>
+                        <div className='p-2 max-h-64'>
+                          <div className='flex flex-nowrap justify-between pb-2 border-b border-slate-200 items-center'>
+                            <div>
+                              <h2 className='text-sm font-bold'>Till date</h2>
+                            </div>
+                            <div>
+                              <h2 className='text-sm font-bold'>Price</h2>
+                            </div>
+                          </div>
+                          {product.prevPrice.filter((prevPrice, index) => index !== 0 && prevPrice).filter((prevPrice) => {
+                            const filterDate = new Date(curDate)
+                            const priceDate = new Date(prevPrice.date.split(' ')[0])
+                            if (priceDate <= filterDate) return prevPrice
+                          }).reverse().map((priceDetail, index) => (
+                            <div key={index} className='flex flex-nowrap justify-between border-b border-slate-200 items-center py-3'>
+                              <div>
+                                <p className='text-sm font-semibold'>{priceDetail.date.split(' ')[0].split('-').join('/')}</p>
+                                <p className='text-xs font-thin'>{priceDetail.date.split(' ')[1].split('_')[0]} {priceDetail.date.split(' ')[1].split('_')[1]}</p>
+                              </div>
+                              <div>
+                                <p className='text-sm text-blue-600 font-bold'>&#8377; {priceDetail.price}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     }
                   </div>
@@ -203,6 +258,33 @@ const Products = () => {
             }
 
           </div>
+        </div>
+        <div className='flex gap-2'>
+          {
+            productPaginationPos !== 1 ?
+              <FontAwesomeIcon
+                className='bg-blue-600 shadow-md shadow-blue-400 text-white w-3 h-3 rounded-md p-1 cursor-pointer'
+                onClick={() => {
+                  setProductPaginationPos(productPaginationPos - 1)
+                }}
+                icon={faAngleLeft} width={10} />
+              : <FontAwesomeIcon
+                className='bg-slate-300 text-slate-100 w-3 h-3 rounded-md p-1'
+                icon={faAngleLeft} width={10} />
+          }
+          {
+            productPaginationPos !== lastPaginationPos ?
+              <FontAwesomeIcon
+                className='bg-blue-600 shadow-md shadow-blue-400 text-white w-3 h-3 rounded-md p-1 cursor-pointer'
+                onClick={() => {
+                  setProductPaginationPos(productPaginationPos + 1)
+                }}
+                icon={faAngleRight} width={10} />
+              : <FontAwesomeIcon
+                className='bg-slate-300 text-slate-100 w-3 h-3 rounded-md p-1'
+                icon={faAngleRight} width={10} />
+          }
+
         </div>
       </div>
 
@@ -215,6 +297,7 @@ const Products = () => {
           <form onSubmit={createProduct} className='flex gap-4 flex-col md:flex-row'>
             <input
               type="text"
+              required
               value={productName}
               onChange={(e) => {
                 setProductName(e.target.value)
@@ -224,6 +307,7 @@ const Products = () => {
             />
             <input
               type="number"
+              required
               value={productPrice}
               onChange={(e) => {
                 setProductPrice(e.target.value)
