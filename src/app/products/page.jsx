@@ -205,9 +205,9 @@ const Products = () => {
                         Save</button>
                     </div>
                   </div>
-                  <div className={productPrevDetails[product._id] ? 'p-2' : ''}>
+                  <div className={productPrevDetails[product._id] ? 'p-2 border' : ''}>
                     {
-                      <div className={`max-h-96 transition-all ${productPrevDetails[product._id] ? 'h-full p-3 opacity-100' : 'h-0 opacity-0'} overflow-auto border border-slate-100 rounded-md shadow-md`}>
+                      <div className={`max-h-96 transition-all border-slate-400 ${productPrevDetails[product._id] ? 'h-full p-3 opacity-100' : 'h-0 opacity-0'} overflow-auto border border-slate-100 rounded-md shadow-md`}>
                         <div className='border-b border-slate-100 pb-2 flex flex-nowrap justify-between items-center'>
                           {product.prevPrice.filter((priceDetail) => priceDetail.startPrice && priceDetail).map((startPrice, index) => (
                             <div className='flex flex-col gap-1' key={index}>

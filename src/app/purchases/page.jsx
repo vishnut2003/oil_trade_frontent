@@ -1,6 +1,6 @@
 'use client';
 
-import AddLocation from '@/components/AddLocation/AddLocation'
+import AddLocation from '@/components/AddPurchaseLocation/AddPurchaseLocation'
 import Link from 'next/link';
 import React, { useState } from 'react'
 

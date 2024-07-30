@@ -1,27 +1,77 @@
 'use client';
 
+import domainName from '@/domainName';
 import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 
 const PurchaseAdd = () => {
 
-    const [productPopup, setProductPopup] = useState(false)
-    const [locationPopup, setLocationPopup] = useState(false)
+    const server = domainName();
+
+    // products dropdown
+    const [productPopup, setProductPopup] = useState(false);
+    const [products, setProducts] = useState([])
+    const [productSearch, setProductSearch] = useState('')
+
+    // location dropdown
+    const [locationPopup, setLocationPopup] = useState(false);
+    const [locations, setLocations] = useState([])
+    const [locationSearch, setLocationSearch] = useState('')
+
+    const [purchaseForm, setPurchaseForm] = useState({
+        location: '',
+        products: [],
+        bargainDate: new Date().toISOString().substring(0, 10),
+        bargainNo: '',
+        rate: '',
+        qty: '',
+        wightInMT: ''
+    })
+
+    useEffect(() => {
+        axios.get(`${server}/purchase/location/get-all`)
+            .then((res) => {
+                setLocations(res.data)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+        axios.get(`${server}/products/all`)
+            .then((res) => {
+                setProducts(res.data)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }, [])
+
+    const submitPurchase = (e) => {
+        e.preventDefault();
+        console.log(purchaseForm)
+    }
 
     return (
         <div className='flex justify-center md:justify-start'>
             <div className='w-full max-w-96 flex flex-col gap-4'>
                 <h2>Add Purchase</h2>
-                <form className='w-full flex flex-col gap-2'>
+                <form className='w-full flex flex-col gap-2' onSubmit={submitPurchase}>
                     <div className='flex gap-2'>
-                        <div className='flex flex-col gap-1'>
+                        <div className='flex flex-col gap-1 w-1/2'>
                             <label className='text-xs'>Company Bargain Date</label>
-                            <input 
-                            type="date" 
-                            className='px-5 py-2 bg-white rounded-sm text-sm border-b border-slate-300 text-slate-500' />
+                            <input
+                                type="date"
+                                value={purchaseForm.bargainDate}
+                                onChange={(e) => {
+                                    setPurchaseForm({
+                                        ...purchaseForm,
+                                        bargainDate: e.target.value
+                                    })
+                                }}
+                                className='px-5 py-2 bg-white rounded-sm text-sm border-b border-slate-300 text-slate-500' />
                         </div>
-                        <div className='flex flex-col gap-1'>
+                        <div className='flex flex-col gap-1 w-1/2'>
                             <label className='text-xs'>Current Date</label>
                             <input type="date" disabled className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-slate-500' value={new Date().toISOString().substring(0, 10)} />
                         </div>
@@ -34,20 +84,71 @@ const PurchaseAdd = () => {
                                     setProductPopup(!productPopup)
                                 }}
                                 className='p-3 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2' >
-                                <span className='bg-slate-200 px-3 py-1 rounded-sm'>Item 1 <FontAwesomeIcon className='text-red-600 ml-2 cursor-pointer' width={10} icon={faXmark} /></span>
-                                <span className='bg-slate-200 px-3 py-1 rounded-sm'>Item 2 <FontAwesomeIcon className='text-red-600 ml-2 cursor-pointer' width={10} icon={faXmark} /></span>
-                                <span className='bg-slate-200 px-3 py-1 rounded-sm'>Item 3 <FontAwesomeIcon className='text-red-600 ml-2 cursor-pointer' width={10} icon={faXmark} /></span>
-                                <span className='bg-slate-200 px-3 py-1 rounded-sm'>Item 4 <FontAwesomeIcon className='text-red-600 ml-2 cursor-pointer' width={10} icon={faXmark} /></span>
-                                <span className='bg-slate-200 px-3 py-1 rounded-sm'>Item 5 <FontAwesomeIcon className='text-red-600 ml-2 cursor-pointer' width={10} icon={faXmark} /></span>
+                                {
+                                    purchaseForm.products.length > 0 ?
+                                    purchaseForm.products.map((product) => (
+                                        <span className='bg-slate-200 px-3 py-1 rounded-md'>
+                                            {product.name}
+                                            <FontAwesomeIcon 
+                                            onClick={() => {
+                                                setPurchaseForm(prevData => {
+                                                    const latestProductList = prevData.products.filter((filterProduct) => {
+                                                        if(filterProduct._id !== product._id) {
+                                                            return filterProduct
+                                                        }
+                                                    })
+                                                    return {
+                                                        ...prevData,
+                                                        products: latestProductList
+                                                    }
+                                                })
+                                            }}
+                                            className='text-red-600 ml-2 cursor-pointer' 
+                                            width={10} 
+                                            icon={faXmark} />
+                                        </span>
+                                    )):
+                                    <span className=' px-3 py-1 rounded-md'>
+                                            Select products
+                                        </span>
+                                }
                             </div>
                             <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full  shadow-md z-10 ${productPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
-                                <input type="text" placeholder='Search product' className='border border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
+                                <input 
+                                type="text" 
+                                value={productSearch}
+                                onChange={(e) => {
+                                    setProductSearch(e.target.value)
+                                }}
+                                placeholder='Search product' 
+                                className='border border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
                                 <ul className='flex gap-1 flex-col'>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 1 <FontAwesomeIcon icon={faCheck} width={15} /></li>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 2</li>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 3</li>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 4</li>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 5</li>
+                                    {products.filter((product) => {
+                                        const searchText = productSearch.toLocaleLowerCase()
+                                        const productName = product.name.toLocaleLowerCase()
+                                        if(productName.includes(searchText)) {
+                                            return product
+                                        }
+                                    }).map((product) => (
+                                        <li 
+                                        onClick={() =>{
+                                            if(!purchaseForm.products.includes(product)) {
+                                                setPurchaseForm({
+                                                    ...purchaseForm,
+                                                    products: [...purchaseForm.products, product]
+                                                })
+                                            } 
+                                        }}
+                                        className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>
+                                            <div className='flex flex-col gap-1'>
+                                                <p className='text-sm font-semibold text-black'>{product.name}</p>
+                                            </div>
+                                            {
+                                                purchaseForm.products.includes(product) &&
+                                                <FontAwesomeIcon icon={faCheck} width={15} className='text-blue-600'/>
+                                            }
+                                        </li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -55,27 +156,66 @@ const PurchaseAdd = () => {
                     <div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-xs'>Company Bargain No.</label>
-                            <input type="text" className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
+                            <input 
+                            value={purchaseForm.bargainNo}
+                            onChange={(e) => {
+                                setPurchaseForm({
+                                    ...purchaseForm,
+                                    bargainNo: e.target.value
+                                })
+                            }}
+                            type="text" 
+                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
                         </div>
                     </div>
                     <div>
                         <div className='relative'>
                             <label className='text-xs'>Location</label>
                             <div
-                            onClick={() => {
-                                setLocationPopup(!locationPopup)
-                            }}
+                                onClick={() => {
+                                    setLocationPopup(!locationPopup)
+                                }}
                                 className='p-3 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2' >
-                                <p>Select Location</p>
+                                {
+                                    purchaseForm.location ?
+                                        <p>{purchaseForm.location.location}</p> :
+                                        <p>Select Location</p>
+                                }
                             </div>
                             <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full shadow-md ${locationPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
-                                <input type="text" placeholder='Search product' className='border border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
+                                <input
+                                    type="text"
+                                    value={locationSearch}
+                                    onChange={(e) => {
+                                        setLocationSearch(e.target.value)
+                                    }}
+                                    placeholder='Search product'
+                                    className='border border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
                                 <ul className='flex gap-1 flex-col'>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 1 <FontAwesomeIcon icon={faCheck} width={15} /></li>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 2</li>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 3</li>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 4</li>
-                                    <li className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>Item 5</li>
+                                    {locations.filter((location) => {
+                                        const search = locationSearch.toLocaleLowerCase()
+                                        const locationName = location.location.toLocaleLowerCase()
+                                        if (locationName.includes(search)) return location
+                                    }).map((location) => (
+                                        <li
+                                            onClick={() => {
+                                                setPurchaseForm({
+                                                    ...purchaseForm,
+                                                    location: location
+                                                })
+                                                setLocationPopup(false)
+                                            }}
+                                            className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center gap-2'>
+                                            <div className='flex flex-col gap-1'>
+                                                <p className='text-sm text-slate-900 font-semibold'>{location.location}</p>
+                                                <p className='text-xs text-slate-500 font-thin text-ellipsis line-clamp-1'>{location.address}</p>
+                                            </div>
+                                            {
+                                                location === purchaseForm.location &&
+                                                <FontAwesomeIcon icon={faCheck} width={15} className='text-blue-600' />
+                                            }
+                                        </li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -83,21 +223,48 @@ const PurchaseAdd = () => {
                     <div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-xs'>Rate/Unit</label>
-                            <input type="number" className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
+                            <input 
+                            value={purchaseForm.rate}
+                            onChange={(e) => {
+                                setPurchaseForm({
+                                    ...purchaseForm,
+                                    rate: e.target.value
+                                })
+                            }}
+                            type="number" 
+                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
                         </div>
                     </div>
-                    
+
                     <div>
                         <div className='flex flex-col gap-1'>
                             <label className='text-xs'>Quantity</label>
-                            <input type="number" className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
+                            <input 
+                            value={purchaseForm.qty}
+                            onChange={(e) => {
+                                setPurchaseForm({
+                                    ...purchaseForm,
+                                    qty: e.target.value
+                                })
+                            }}
+                            type="number" 
+                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
                         </div>
                     </div>
-                    
-                    <div>
+
+                    <div> 
                         <div className='flex flex-col gap-1'>
                             <label className='text-xs'>Weight in MT</label>
-                            <input type="number" className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
+                            <input 
+                            value={purchaseForm.wightInMT}
+                            onChange={(e) => {
+                                setPurchaseForm({
+                                    ...purchaseForm,
+                                    wightInMT: e.target.value
+                                })
+                            }}
+                            type="number" 
+                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
                         </div>
                     </div>
                     <button className='px-3 py-2 bg-blue-600 text-white text-sm shadow-md shadow-blue-600/50 rounded-md'>Create Purchase</button>
