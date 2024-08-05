@@ -1,10 +1,10 @@
-import { Inter, Poppins } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Header from "@/components/Header/Header"
 import { Viewport } from 'next';
 
-const poppins = Poppins({ weight: '500', subsets: ["latin"] });
+const montserrat = Montserrat({ weight: '500', subsets: ["latin"] });
 
 export const metadata = {
   title: "Trade Oil",
@@ -20,7 +20,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={poppins.className}>
+      <body className={montserrat.className}>
         <div className="flex">
           <div>
             <Sidebar />

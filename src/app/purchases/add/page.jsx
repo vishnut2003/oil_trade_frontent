@@ -9,6 +9,9 @@ import React, { useEffect, useState } from 'react'
 const PurchaseAdd = () => {
 
     const server = domainName();
+    const [purchaseCreateLoading, setPurchaseCreateLoading] = useState(false);
+    const [purchaseCreateSuccess, setPurchaseCreateSuccess] = useState('');
+    const [purchaseCreateFailed, setPurchaseCreateFailed] = useState('')
 
     // products dropdown
     const [productPopup, setProductPopup] = useState(false);
@@ -46,12 +49,17 @@ const PurchaseAdd = () => {
 
     const submitPurchase = (e) => {
         e.preventDefault();
+        setPurchaseCreateLoading(true)
         axios.post(`${server}/purchase/create-purchase`, purchaseForm)
             .then((res) => {
-                console.log(res)
+                setPurchaseCreateLoading(false);
+                setPurchaseCreateSuccess(res.data);
+                setTimeout(() => setPurchaseCreateSuccess(''), 5000);
             })
             .catch((err) => {
-                console.log(err)
+                setPurchaseCreateLoading(false);
+                setPurchaseCreateFailed(err.response.data);
+                setTimeout(() => setPurchaseCreateFailed(''), 5000);
             })
     }
 
@@ -120,7 +128,6 @@ const PurchaseAdd = () => {
                             <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full  shadow-md z-10 ${productPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
                                 <input
                                     type="text"
-                                    required
                                     value={productSearch}
                                     onChange={(e) => {
                                         setProductSearch(e.target.value)
@@ -178,7 +185,7 @@ const PurchaseAdd = () => {
                         purchaseForm.products.length !== 0 &&
                         <div className='flex flex-col gap-2 border border-slate-200 p-3 rounded-md bg-white'>
                             {purchaseForm.products.map((product) => (
-                                <div className='flex flex-nowrap justify-between gap-2 items-center border-b border-slate-200 pb-2' key={product._id}>
+                                <div className='flex flex-col md:flex-row flex-nowrap justify-between gap-2 md:items-center border-b border-slate-200 pb-2' key={product._id}>
                                     <p className='text-sm'>{product.name}</p>
                                     <div className='flex flex-nowrap gap-2'>
                                         <input
@@ -299,12 +306,11 @@ const PurchaseAdd = () => {
                             <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full shadow-md ${locationPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
                                 <input
                                     type="text"
-                                    required
                                     value={locationSearch}
                                     onChange={(e) => {
                                         setLocationSearch(e.target.value)
                                     }}
-                                    placeholder='Search product'
+                                    placeholder='Search Location'
                                     className='border border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
                                 <ul className='flex gap-1 flex-col'>
                                     {locations.filter((location) => {
@@ -383,7 +389,25 @@ const PurchaseAdd = () => {
                             className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
                         </div>
                     </div> */}
-                    <button className='px-3 py-2 bg-blue-600 text-white text-sm shadow-md shadow-blue-600/50 rounded-md'>Create Purchase</button>
+                    <button className='px-3 py-2 bg-blue-600 text-white text-sm shadow-md shadow-blue-600/50 rounded-md flex justify-center items-center gap-2'>
+                        {
+                            purchaseCreateLoading && 
+                            <div className='w-4 h-4 rounded-full border border-b-0 border-r-0 animate-spin'></div>
+                        }
+                        Create Purchase
+                    </button>
+                    {
+                        purchaseCreateSuccess &&
+                        <div className='py-2 px-4 rounded-md bg-green-200 border border-green-500'>
+                            <p className='text-green-500 text-sm'>{purchaseCreateSuccess}</p>
+                        </div>
+                    }
+                    {
+                        purchaseCreateFailed &&
+                        <div className='py-2 px-4 rounded-md bg-red-200 border border-red-500'>
+                            <p className='text-red-500 text-sm'>{purchaseCreateFailed}</p>
+                        </div>
+                    }
                 </form>
             </div>
         </div>
