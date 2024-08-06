@@ -1,6 +1,7 @@
 'use client';
 
 import AddLocation from '@/components/AddPurchaseLocation/AddPurchaseLocation';
+import PurchaseViewPopUp from '@/components/purchaseViewPopUp/PurchaseViewPopUp';
 import domainName from '@/domainName';
 import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -19,6 +20,7 @@ const Purchase = () => {
   const [locationEdit, setLocationEdit] = useState({});
   const [locationChanges, setLocationChanges] = useState({})
   const [locationChangesErr, setLocationChangesErr] = useState('')
+  const [locationChangesSuccess, setLocationChangesSuccess] = useState('')
 
   useEffect(() => {
     getAllPurchase()
@@ -113,6 +115,30 @@ const Purchase = () => {
                         })
                       }}
                       icon={faAngleDown} width={"15px"} className='cursor-pointer' />
+
+                    {/* Purchase PopUp */}
+                    {
+                      purchaseEdit[purchase._id] &&
+                      <div className={`fixed top-0 left-0 w-full h-full flex flex-col justify-center items-center bg-transparent drop-shadow-2xl`}>
+                        <PurchaseViewPopUp locationId={purchase.location} purchase={purchase}>
+                          <div className='flex justify-between border-b border-slate-200 pb-2'>
+                            <h2 className='text-base font-semibold'>Purchase Details</h2>
+                            <button
+                              onClick={() => {
+                                setPurchaseEdit({
+                                  ...purchaseEdit,
+                                  [purchase._id]: false
+                                })
+                                getAllPurchase()
+                                  .then((purchases) => {
+                                    setPurchases(purchases)
+                                  })
+                              }}
+                              className='text-sm font-semibold text-red-500'>Close</button>
+                          </div>
+                        </PurchaseViewPopUp>
+                      </div>
+                    }
                   </td>
                 </tr>
               </>
@@ -174,9 +200,22 @@ const Purchase = () => {
                       <div className='p-5 bg-white w-full max-w-xs rounded-md'>
                         <form className='flex flex-col gap-3 w-full' onSubmit={(e) => {
                           e.preventDefault();
-                          if(locationChanges[location._id] == undefined) {
-                            setLocationChangesErr('No changes made...')
-                            console.log('clicked')
+                          if (locationChanges[location._id] === undefined) {
+                            setLocationChangesErr('No changes made...');
+                            setTimeout(() => setLocationChangesErr(''), 5000)
+                          } else {
+                            axios.post(`${server}/purchase/location/edit`, { ...locationChanges[location._id], id: location._id })
+                              .then((res) => {
+                                setLocationChangesSuccess(res.data)
+                                getAllLocation().then((locations) => {
+                                  setLocations(locations)
+                                })
+
+                                setTimeout(() => setLocationChangesSuccess(''), 5000);
+                              })
+                              .catch((err) => {
+                                console.log(err)
+                              })
                           }
                         }}>
                           <div className='flex flex-col gap-1 w-full'>
@@ -222,9 +261,16 @@ const Purchase = () => {
                               className='text-red-500 text-sm font-semibold'>Close</button>
                           </div>
                           {
-                            locationChangesErr[location._id] &&
+                            locationChangesErr &&
                             <div>
-                              <p className='py-2 px-3 bg-red-100 text-red-600 rounded-md'>{locationChangesErr[location._id]}</p>
+                              <p className='py-2 px-3 bg-red-100 text-red-600 rounded-md'>{locationChangesErr}</p>
+                            </div>
+                          }
+
+                          {
+                            locationChangesSuccess &&
+                            <div>
+                              <p className='py-2 px-3 bg-green-100 text-green-600 rounded-md'>{locationChangesSuccess}</p>
                             </div>
                           }
                         </form>
