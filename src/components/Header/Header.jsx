@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import React from 'react'
 
 const Header = () => {
@@ -9,7 +10,7 @@ const Header = () => {
           <p className='text-xs'>admin</p>
         </div>
         <div>
-          <img src="/dashboard-icons/user-avatar.png" width={40} className='rounded-full'/>
+          <Image src={"/dashboard-icons/user-avatar.png"} width={40} height={40} className='rounded-full' alt='user_avatar'/>
         </div>
       </div>
     </div>

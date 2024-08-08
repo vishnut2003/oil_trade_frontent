@@ -20,7 +20,7 @@ const UserTable = () => {
       .catch((err) => {
         console.log(err)
       })
-  }, [])
+  }, [server])
 
   return (
     <div className='w-full'>

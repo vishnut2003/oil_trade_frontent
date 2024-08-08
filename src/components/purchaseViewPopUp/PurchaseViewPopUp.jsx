@@ -18,7 +18,7 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
             .catch((err) => {
                 console.log(err)
             })
-    }, [])
+    }, [server, purchase])
 
     return (
         <div className='p-5 bg-white w-full max-w-xl rounded-md flex flex-col gap-3'>
@@ -77,7 +77,7 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
                     </thead>
                     <tbody>
                         {purchase.products.map((product) => (
-                            <tr className='text-sm font-medium border-b border-slate-100 hover:bg-blue-100'>
+                            <tr className='text-sm font-medium border-b border-slate-100 hover:bg-blue-100' key={product.name}>
                                 <td className='py-2 px-3'>{product.name}</td>
                                 <td className='py-2 px-3'>{product.price}</td>
                                 <td className='py-2 px-3'>{product.qty}</td>

@@ -31,7 +31,7 @@ const Products = () => {
 
   useEffect(() => {
     getAllProducts()
-  }, [server])
+  }, [getAllProducts])
 
   // Get all products
   const getAllProducts = () => {

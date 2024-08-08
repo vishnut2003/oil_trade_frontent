@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 
-const PurchaseAdd = () => {
+const BargainTransferAdd = () => {
 
     const server = domainName();
     const [purchaseCreateLoading, setPurchaseCreateLoading] = useState(false);
@@ -342,53 +342,6 @@ const PurchaseAdd = () => {
                             </div>
                         </div>
                     </div>
-                    {/* <div>
-                        <div className='flex flex-col gap-1'>
-                            <label className='text-xs'>Rate/Unit</label>
-                            <input 
-                            value={purchaseForm.rate}
-                            onChange={(e) => {
-                                setPurchaseForm({
-                                    ...purchaseForm,
-                                    rate: e.target.value
-                                })
-                            }}
-                            type="number" 
-                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
-                        </div>
-                    </div> */}
-
-                    {/* <div>
-                        <div className='flex flex-col gap-1'>
-                            <label className='text-xs'>Quantity</label>
-                            <input 
-                            value={purchaseForm.qty}
-                            onChange={(e) => {
-                                setPurchaseForm({
-                                    ...purchaseForm,
-                                    qty: e.target.value
-                                })
-                            }}
-                            type="number" 
-                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
-                        </div>
-                    </div> */}
-
-                    {/* <div> 
-                        <div className='flex flex-col gap-1'>
-                            <label className='text-xs'>Weight in MT</label>
-                            <input 
-                            value={purchaseForm.wightInMT}
-                            onChange={(e) => {
-                                setPurchaseForm({
-                                    ...purchaseForm,
-                                    wightInMT: e.target.value
-                                })
-                            }}
-                            type="number" 
-                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
-                        </div>
-                    </div> */}
                     <button className='px-3 py-2 bg-blue-600 text-white text-sm shadow-md shadow-blue-600/50 rounded-md flex justify-center items-center gap-2'>
                         {
                             purchaseCreateLoading && 
@@ -414,4 +367,4 @@ const PurchaseAdd = () => {
     )
 }
 
-export default PurchaseAdd
+export default BargainTransferAdd

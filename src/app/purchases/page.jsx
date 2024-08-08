@@ -34,7 +34,7 @@ const Purchase = () => {
     getAllLocation().then((locations) => {
       setLocations(locations);
     })
-  }, [])
+  }, [getAllPurchase, getAllLocation])
 
   function getAllPurchase() {
     return new Promise((resolve, reject) => {
@@ -81,7 +81,7 @@ const Purchase = () => {
           </thead>
           <tbody>
             {purchases.map((purchase) => (
-              <>
+              <React.Fragment key={purchase._id}>
                 <tr className='border-b border-slate-100'>
                   <td className='py-2 px-4 text-sm flex flex-col sm:table-cell gap-2'>
                     <b className='sm:hidden'>Bargain Date</b>
@@ -141,7 +141,7 @@ const Purchase = () => {
                     }
                   </td>
                 </tr>
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>
@@ -174,7 +174,7 @@ const Purchase = () => {
           </thead>
           <tbody>
             {locations.map((location) => (
-              <tr className='border-b border-slate-100'>
+              <tr className='border-b border-slate-100' key={location._id}>
                 <td className='py-2 px-4 text-sm flex flex-col sm:table-cell gap-2'>
                   <b className='sm:hidden'>Location</b>
                   {location.location}
