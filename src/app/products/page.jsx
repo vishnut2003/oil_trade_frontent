@@ -30,8 +30,16 @@ const Products = () => {
   const [lastPaginationPos, setLastPaginationPo] = useState(0)
 
   useEffect(() => {
-    getAllProducts()
-  }, [getAllProducts])
+    axios.get(`${server}/products/all`)
+      .then((res) => {
+        setProductsList(res.data)
+        const lastPagePos = res.data.length / (productsPerPage + 1)
+        setLastPaginationPo(Math.ceil(lastPagePos))
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [])
 
   // Get all products
   const getAllProducts = () => {

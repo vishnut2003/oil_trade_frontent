@@ -1,5 +1,6 @@
 import domainName from '@/domainName'
 import axios from 'axios'
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 
 const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
@@ -13,6 +14,8 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
             .then((res) => {
                 if (!res.data) {
                     setLocationDetails('')
+                } else {
+                    setLocationDetails(res.data)
                 }
             })
             .catch((err) => {
@@ -47,9 +50,9 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
                 <h2 className='text-base font-semibold'>Location</h2>
                 {
                     locationDetails ?
-                        <div>
-                            <b>{purchase.location}</b>
-                            <p>{purchase.address}</p>
+                        <div className='text-sm'>
+                            <b>{locationDetails.location}</b>
+                            <p>{locationDetails.address}</p>
                         </div> :
                         <div>
                             <p className='text-sm font-semibold text-red-500'>Location is deleted!</p>
@@ -88,25 +91,32 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
                 </table>
             </div>
 
-            <div>
-                <button 
-                onClick={() => {
-                    const confirm = window.confirm('Are you sure you want to delete this purchase?');
-                    if(confirm) {
-                        axios.post(`${server}/purchase/delete-one`, {purchaseId: purchase._id})
-                        .then((res) => {
-                            setPurchaseDeletedSuccess(res.data)
-                        })
-                        .catch((err) => {
-                            console.log(err)
-                        })
-                    }
-                }}
-                className='bg-red-500 text-sm font-semibold text-white py-2 px-4 rounded-md shadow-md shadow-red-500'>Delete</button>
+            <div className='flex flex-col md:flex-row justify-between items-center gap-3'>
+                <button
+                    onClick={() => {
+                        console.log(purchase)
+                    }}
+                    className='text-sm font-semibold text-white bg-blue-500 py-2 px-4 rounded-md shadow-md shadow-blue-500'>
+                    Convert to Purchase Invoice
+                </button>
+                <button
+                    onClick={() => {
+                        const confirm = window.confirm('Are you sure you want to delete this purchase?');
+                        if (confirm) {
+                            axios.post(`${server}/purchase/delete-one`, { purchaseId: purchase._id })
+                                .then((res) => {
+                                    setPurchaseDeletedSuccess(res.data)
+                                })
+                                .catch((err) => {
+                                    console.log(err)
+                                })
+                        }
+                    }}
+                    className='bg-red-500 text-sm font-semibold text-white py-2 px-4 rounded-md shadow-md shadow-red-500'>Delete</button>
             </div>
             <div>
                 {
-                    purchaseDeletedSuccess && 
+                    purchaseDeletedSuccess &&
                     <div>
                         <p className='py-2 px-4 bg-green-200 text-green-600 text-sm font-semibold rounded-md'>{purchaseDeletedSuccess}</p>
                     </div>
