@@ -343,31 +343,51 @@ const Products = () => {
             <p className='text-sm text-green-500 py-1 px-4 text-center md:text-left'>{createProductSuccess}</p>
           }
         </div>
-        <div className='border border-slate-200 min-w-64 md:max-w-max rounded-md flex flex-wrap gap-2 p-2'>
-          {
-            productLists.map((product, index) => (
-              <p className='box-border py-2 px-4 bg-slate-200 w-max rounded-md text-sm text-slate-500' key={index}>
-                <FontAwesomeIcon
-                  icon={faTimes}
-                  width={9}
-                  onClick={() => {
-                    const confirm = window.confirm(`Are you sure you want to delete ${product.name}. all the data related to this will be deleted and can not undo this action`)
-                    if (confirm) {
-                      axios.get(`${server}/products/delete/${product._id}`)
-                        .then((res) => {
-                          window.alert(res.data)
-                          getAllProducts()
-                        })
-                        .catch((err) => {
-                          console.log(err)
-                        })
-                    }
-                  }}
-                  className='mr-2 text-red-400 cursor-pointer' />
-                {product.name}
-              </p>
-            ))
-          }
+        <div className='border border-slate-200 bg-white min-w-96 w-full rounded-md flex flex-col gap-2 p-4'>
+          <table className='w-full'>
+            <thead className='text-left'>
+              <tr className='border-b border-slate-200'>
+                <th className='py-2 px-4'>Product Name</th>
+                <th className='py-2 px-4'>Stock</th>
+                <th className='py-2 px-4'>Price</th>
+                <th className='py-2 px-4'></th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                productLists.map((product, index) => (
+                  <tr>
+                    <td className='py-2 px-4'>
+                      <p className='text-left font-semibold'>{product.name}</p>
+                    </td>
+                    <td className='py-2 px-4'>
+                      <p>{product.qty} </p>
+                    </td>
+                    <td className='py-2 px-4'>
+                      <p className='text-right font-semibold'>{product.price} &#8377;</p>
+                    </td>
+                    <td className='py-2 px-4'>
+                      <button
+                        onClick={() => {
+                          const confirm = window.confirm(`Are you sure you want to delete ${product.name}. all the data related to this will be deleted and can not undo this action`)
+                          if (confirm) {
+                            axios.get(`${server}/products/delete/${product._id}`)
+                              .then((res) => {
+                                window.alert(res.data)
+                                getAllProducts()
+                              })
+                              .catch((err) => {
+                                console.log(err)
+                              })
+                          }
+                        }}
+                        className='text-sm bg-red-500 text-white font-semibold py-2 px-3 rounded-md shadow-md shadow-red-600'>Delete</button>
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

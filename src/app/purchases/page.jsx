@@ -1,6 +1,7 @@
 'use client';
 
 import AddLocation from '@/components/AddPurchaseLocation/AddPurchaseLocation';
+import PurchaseInvoiceViewPopup from '@/components/purchaseInvoiceViewPopup/purchaseInvoiceViewPopup';
 import PurchaseViewPopUp from '@/components/purchaseViewPopUp/PurchaseViewPopUp';
 import domainName from '@/domainName';
 import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
@@ -22,7 +23,6 @@ const Purchase = () => {
     createdAt: '',
     status: ''
   })
-  const [afterFilterPurchase, setAfterFilterPurchase] = useState([])
 
   const [locations, setLocations] = useState([]);
   const [locationSearch, setLocationSearch] = useState('')
@@ -30,6 +30,9 @@ const Purchase = () => {
   const [locationChanges, setLocationChanges] = useState({})
   const [locationChangesErr, setLocationChangesErr] = useState('')
   const [locationChangesSuccess, setLocationChangesSuccess] = useState('')
+
+  const [purchaseInvoiceEntries, setPurchaseInvoiceEntries] = useState([])
+  const [purchaseInvoicePopup, setPurchaseInvoicePopup] = useState({})
 
   useEffect(() => {
 
@@ -45,6 +48,13 @@ const Purchase = () => {
       .then((res) => {
         setLocations(res.data);
       })
+      .catch((err) => {
+        console.log(err)
+      })
+
+    axios.get(`${server}/purchase/purchase-invoice/get-all`).then(async(res) => {
+      setPurchaseInvoiceEntries(res.data)
+    })
       .catch((err) => {
         console.log(err)
       })
@@ -75,8 +85,20 @@ const Purchase = () => {
     })
   }
 
+  function getAllPurchaseInvoice() {
+    return new Promise((resolve, reject) => {
+      axios.get(`${server}/purchase/purchase-invoice/get-all`)
+        .then((res) => {
+          resolve(res.data)
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+    })
+  }
+
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='flex flex-col gap-4 mb-6'>
       <div className='flex gap-3'>
         <Link href={'/purchases/add'}>
           <button className='px-3 py-2 bg-blue-600 text-white text-sm shadow-md shadow-blue-600/50 rounded-md'>Add Bargain Purchase</button>
@@ -141,6 +163,8 @@ const Purchase = () => {
             className='text-sm font-medium py-2 px-4 rounded-md shadow-sm'>
             <option value="">- Select Status -</option>
             <option value="pending">Pending</option>
+            <option value="partial">Partial</option>
+            <option value="complete">Complete</option>
           </select>
         </div>
       </div>
@@ -205,7 +229,11 @@ const Purchase = () => {
                         }
                         {
                           purchase.status === 'complete' &&
-                          <p className='py-1 px-3 bg-gree-200 text-green-600 rounded-md w-max font-semibold'>Complete</p>
+                          <p className='py-1 px-3 bg-green-200 text-green-600 rounded-md w-max font-semibold'>Complete</p>
+                        }
+                        {
+                          purchase.status === 'partial' &&
+                          <p className='py-1 px-3 bg-yellow-50 text-yellow-500 rounded-md w-max font-semibold'>Partial</p>
                         }
                       </td>
                       <td className='py-2 px-4 flex justify-start'>
@@ -235,6 +263,10 @@ const Purchase = () => {
                                       .then((purchases) => {
                                         setPurchases(purchases)
                                       })
+                                    
+                                    getAllPurchaseInvoice().then((purchaseInvoices) => {
+                                      setPurchaseInvoiceEntries(purchaseInvoices)
+                                    })
                                   }}
                                   className='text-sm font-semibold text-red-500'>Close</button>
                               </div>
@@ -437,158 +469,70 @@ const Purchase = () => {
 
       {/* Actual Purchase */}
       <div>
-        <h2 className='text-lg font-bold'>Purchase Invoices</h2>
+        <h2 className='text-lg font-extrabold'>Purchase Invoices</h2>
       </div>
-      <div className='w-full md:max-w-screen-md flex flex-col md:flex-row justify-between items-end gap-2'>
-        <div>
-          <p className='text-sm font-medium text-slate-400 mb-1'>Bargain Date</p>
-          <input
-            type="date"
-            value={purchaseSearch.bargainDate}
-            onChange={(e) => {
-              setPurchaseSearch({
-                ...purchaseSearch,
-                bargainDate: e.target.value
-              })
-            }}
-            className='text-sm font-medium py-2 px-4 rounded-md shadow-sm'
-            placeholder='Bargain Date' />
-        </div>
-        <div>
-          <p className='text-sm font-medium text-slate-400 mb-1'>Bargain No.</p>
-          <input
-            type="text"
-            value={purchaseSearch.bargainNo}
-            onChange={(e) => {
-              setPurchaseSearch({
-                ...purchaseSearch,
-                bargainNo: e.target.value
-              })
-            }}
-            className='text-sm font-medium py-2 px-4 rounded-md shadow-sm'
-            placeholder='Bargain No.'
-          />
-        </div>
-        <div>
-          <p className='text-sm font-medium text-slate-400 mb-1'>Created Date</p>
-          <input
-            type="Date"
-            value={purchaseSearch.createdAt}
-            onChange={(e) => {
-              setPurchaseSearch({
-                ...purchaseSearch,
-                createdAt: e.target.value
-              })
-            }}
-            className='text-sm font-medium py-2 px-4 rounded-md shadow-sm'
-          />
-        </div>
-        <div>
-          <p className='text-sm font-medium text-slate-400 mb-1'>Select Status</p>
-          <select
-            value={purchaseSearch.status}
-            onChange={(e) => {
-              setPurchaseSearch({
-                ...purchaseSearch,
-                status: e.target.value
-              })
-            }}
-            className='text-sm font-medium py-2 px-4 rounded-md shadow-sm'>
-            <option value="">- Select Status -</option>
-            <option value="pending">Pending</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <button
-          onClick={() => {
-            setPurchaseSearch({
-              bargainDate: '',
-              bargainNo: '',
-              createdAt: '',
-              status: ''
-            })
-          }}
-          className='text-sm bg-red-600 text-white rounded-md shadow-md shadow-red-500 py-2 px-3'>Reset Filter</button>
-      </div>
-      <div className='bg-white p-2 w-full md:max-w-screen-md rounded-md shadow-md shadow-slate-200'>
+      <div className='bg-white p-2 w-full md:max-w-screen-md rounded-md shadow-md shadow-slate-200 max-h-96 overflow-auto'>
         <table className='w-full'>
           <thead className='border-b border-slate-100 hidden sm:table-header-group'>
             <tr>
-              <th className='py-2 px-4 text-left'>Bargain Date</th>
-              <th className='py-2 px-4 text-left'>Bargain No.</th>
-              <th className='py-2 px-4 text-left'>Created Date</th>
-              <th className='py-2 px-4 text-left'>Status</th>
+              <th className='py-2 px-4 text-left'>Invoice Date</th>
+              <th className='py-2 px-4 text-left'>Invoice No.</th>
+              <th className='py-2 px-4 text-left'>Bargain No</th>
+              <th className='py-2 px-4 text-left'>Last Updated</th>
             </tr>
           </thead>
           <tbody>
             {
-              purchases.length > 0 ?
-                purchases.filter((purchase) => {
-                  if (!purchaseSearch.bargainDate && !purchaseSearch.bargainNo && !purchaseSearch.createdAt && !purchaseSearch.status) {
-                    return purchase;
-                  } else {
-                    if (
-                      purchase.bargainDate.substring(0, 10) === purchaseSearch.bargainDate ||
-                      purchase.bargainNo === purchaseSearch.bargainNo ||
-                      purchase.createdAt.substring(0, 10) === purchaseSearch.createdAt ||
-                      purchase.status === purchaseSearch.status
-                    ) {
-                      return purchase;
-                    }
-                  }
-                }).map((purchase) => (
+              purchaseInvoiceEntries.length > 0 ?
+                purchaseInvoiceEntries.map((purchase) => (
                   <React.Fragment key={purchase._id}>
                     <tr className='border-b border-slate-100'>
                       <td className='py-2 px-4 text-sm flex flex-col sm:table-cell gap-2'>
-                        <b className='sm:hidden'>Bargain Date</b>
-                        {purchase.bargainDate.substring(0, 10).split('-').join('/')}
-                      </td>
-                      <td className='py-2 px-4 text-sm flex flex-col sm:table-cell gap-2'>
-                        <b className='sm:hidden'>Bargain No.</b>
-                        {purchase.bargainNo}
-                      </td>
-                      <td className='py-2 px-4 text-sm flex flex-col sm:table-cell gap-2'>
-                        <b className='sm:hidden'>Created Date</b>
+                        <b className='sm:hidden'>Invoice Date</b>
                         {purchase.createdAt.substring(0, 10).split('-').join('/')}
                       </td>
                       <td className='py-2 px-4 text-sm flex flex-col sm:table-cell gap-2'>
-                        <b className='sm:hidden'>Status</b>
-                          purchase.status === 'pending' &&
-                          <p className='py-1 px-3 bg-red-200 text-red-600 rounded-md w-max font-semibold'>Pending</p>
-                        
+                        <b className='sm:hidden'>Invoice No.</b>
+                        {purchase.invoiceNo}
+                      </td>
+                      <td className='py-2 px-4 text-sm flex flex-col sm:table-cell gap-2'>
+                        <b className='sm:hidden'>Bargain No</b>
+                        {purchase.againstBargainNo}
+                      </td>
+                      <td className='py-2 px-4 text-sm flex flex-col sm:table-cell gap-2'>
+                        <b className='sm:hidden'>Last Updated</b>
+                        {purchase.updatedAt.substring(0, 10).split('-').join('/')}
                       </td>
                       <td className='py-2 px-4 flex justify-start'>
-                        <FontAwesomeIcon
-                          onClick={() => {
-                            setPurchaseEdit({
-                              ...purchaseEdit,
-                              [purchase._id]: true
-                            })
-                          }}
-                          icon={faAngleDown} width={"15px"} className='cursor-pointer' />
+                        <FontAwesomeIcon 
+                        onClick={() => {
+                          setPurchaseInvoicePopup({
+                            ...purchaseInvoicePopup,
+                            [purchase._id]: true
+                          })
+                        }}
+                        icon={faAngleDown} 
+                        width={"15px"} 
+                        className='cursor-pointer' />
 
-                        {/* Purchase PopUp */}
+                        {/* Purchase Invoice PopUp */}
                         {
-                          purchaseEdit[purchase._id] &&
+                          purchaseInvoicePopup[purchase._id] &&
                           <div className={`fixed top-0 left-0 w-full h-full flex flex-col justify-center items-center bg-transparent drop-shadow-2xl`}>
-                            <PurchaseViewPopUp locationId={purchase.location} purchase={purchase}>
+                            <PurchaseInvoiceViewPopup locationId={purchase.location} purchase={purchase}>
                               <div className='flex justify-between border-b border-slate-200 pb-2'>
-                                <h2 className='text-base font-semibold'>Purchase Details</h2>
+                                <h2 className='text-base font-semibold'>Purchase Invoice</h2>
                                 <button
                                   onClick={() => {
-                                    setPurchaseEdit({
-                                      ...purchaseEdit,
+                                    setPurchaseInvoicePopup({
+                                      ...purchaseInvoicePopup,
                                       [purchase._id]: false
                                     })
-                                    getAllPurchase()
-                                      .then((purchases) => {
-                                        setPurchases(purchases)
-                                      })
+                                    getAllPurchaseInvoice().then((purchaseInvoices) => setPurchaseInvoiceEntries(purchaseInvoices))
                                   }}
                                   className='text-sm font-semibold text-red-500'>Close</button>
                               </div>
-                            </PurchaseViewPopUp>
+                            </PurchaseInvoiceViewPopup>
                           </div>
                         }
                       </td>

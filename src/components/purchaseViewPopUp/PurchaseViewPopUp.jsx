@@ -1,6 +1,5 @@
 import domainName from '@/domainName'
 import axios from 'axios'
-import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 
 const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
@@ -8,6 +7,13 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
     const [locationDetails, setLocationDetails] = useState('')
 
     const [purchaseDeletedSuccess, setPurchaseDeletedSuccess] = useState('')
+
+    const [convertToPurchasePopup, setConvertToPurchasePopup] = useState(false)
+
+    // qty selection for convert to purchase invoice
+    const [purchaseInvoiceQty, setPurchaseInvoiceQty] = useState({});
+    const [invoiceCreateErr, setInvoiceCreateErr] = useState('');
+    const [invoiceCreateSuccess, setInvoiceCreateSuccess] = useState('');
 
     useEffect(() => {
         axios.post(`${server}/purchase/location/get-one`, { locationId: purchase.location })
@@ -43,7 +49,13 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
                 </div>
                 <div className='text-sm text-right'>
                     <b>Status</b>
-                    <p className='text-red-500'>{purchase.status}</p>
+                    {
+                        purchase.status === 'pending' ?
+                            <p className='text-red-500'>{purchase.status}</p> :
+                            purchase.status === 'partial' ?
+                                <p className='text-yellow-500'>{purchase.status}</p> :
+                                <p className='text-green-500'>{purchase.status}</p>
+                    }
                 </div>
             </div>
             <div>
@@ -90,15 +102,17 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
                     </tbody>
                 </table>
             </div>
-
             <div className='flex flex-col md:flex-row justify-between items-center gap-3'>
-                <button
-                    onClick={() => {
-                        console.log(purchase)
-                    }}
-                    className='text-sm font-semibold text-white bg-blue-500 py-2 px-4 rounded-md shadow-md shadow-blue-500'>
-                    Convert to Purchase Invoice
-                </button>
+                {
+                    purchase.status !== 'complete' &&
+                    <button
+                        onClick={() => {
+                            setConvertToPurchasePopup(true)
+                        }}
+                        className='text-sm font-semibold text-white bg-blue-500 py-2 px-4 rounded-md shadow-md shadow-blue-500'>
+                        Convert to Purchase Invoice
+                    </button>
+                }
                 <button
                     onClick={() => {
                         const confirm = window.confirm('Are you sure you want to delete this purchase?');
@@ -122,6 +136,74 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
                     </div>
                 }
             </div>
+
+            {/* Convert to Purchse Invoice */}
+            {
+                convertToPurchasePopup &&
+                <div className='p-3 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 drop-shadow-2xl rounded-md bg-white flex flex-col gap-3'>
+                    <div className='flex flex-nowrap gap-2 justify-between'>
+                        <h2 className='font-bold'>Enter Quantity</h2>
+                        <button
+                            onClick={() => {
+                                setConvertToPurchasePopup(false)
+                            }}
+                            className='text-sm text-red-500'>close</button>
+                    </div>
+                    <div className='flex flex-col gap-2'>
+                        {
+                            purchase.products.map((product) => (
+                                <div className='flex justify-between items-center gap-3 text-sm'>
+                                    <div>
+                                        <p className='font-semibold'>{product.name}</p>
+                                    </div>
+                                    <div>
+                                        <input
+                                            type="number"
+                                            value={purchaseInvoiceQty[product._id]?.purchaseQty}
+                                            onChange={(e) => {
+                                                setPurchaseInvoiceQty({
+                                                    ...purchaseInvoiceQty,
+                                                    [product._id]: {
+                                                        productId: product._id,
+                                                        price: product.price,
+                                                        purchaseQty: e.target.value,
+                                                        name: product.name
+                                                    }
+                                                })
+                                            }}
+                                            className='w-20 outline-none border border-slate-300 rounded-md py-1 px-2' />
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                    <div>
+                        <button
+                            onClick={() => {
+                                const arrayOfProductQty = Object.values(purchaseInvoiceQty)
+                                axios.post(`${server}/purchase/purchase-invoice/create`, { ...purchase, qtyPurchased: arrayOfProductQty })
+                                    .then((res) => {
+                                        setInvoiceCreateSuccess(res.data);
+                                    })
+                                    .catch((err) => {
+                                        setInvoiceCreateErr(err.response.data);
+                                    })
+                            }}
+                            className='py-1 w-full bg-blue-600 text-white rounded-md shadow-md shadow-blue-600 text-sm'>Create Purchase</button>
+                    </div>
+
+                    <div>
+                        {
+                            invoiceCreateErr &&
+                            <p className='text-xs font-semibold py-2 px-3 bg-red-100 text-red-500 rounded-md'>{invoiceCreateErr}</p>
+                        }
+                        {
+                            invoiceCreateSuccess &&
+                            <p className='text-xs font-semibold py-2 px-3 bg-green-100 text-green-500 rounded-md'>{invoiceCreateSuccess}</p>
+                        }
+                    </div>
+                </div>
+            }
         </div>
     )
 }
