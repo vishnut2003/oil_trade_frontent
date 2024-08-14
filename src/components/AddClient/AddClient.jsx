@@ -1,9 +1,40 @@
 'use client';
+import domainName from '@/domainName';
+import axios from 'axios';
 import React, { useState } from 'react'
 
 const AddClient = () => {
-
+    const server = domainName();
     const [popUp, setPopUp] = useState(false)
+    const [clientData, setClientData] = useState({
+        companyName: '',
+        clientName: '',
+        email: '',
+        phoneNumber: '',
+        address: ''
+    });
+    const [clientCreatedSuccess, setClientCreatedSuccess] = useState('');
+    const [clientCreatedErr, setClientCreatedErr] = useState('');
+
+    function enterClientData(e) {
+        setClientData({
+            ...clientData,
+            [e.target.name]: e.target.value
+        })
+    }
+
+    function submitClientData(e) {
+        e.preventDefault();
+        axios.post(`${server}/clients/create-one`, clientData)
+            .then((res) => {
+                setClientCreatedSuccess(res.data)
+                setTimeout(() => setClientCreatedSuccess(''), 5000);
+            })
+            .catch((err) => {
+                setClientCreatedErr(err.response.data);
+                setTimeout(() => setClientCreatedErr(''), 5000);
+            })
+    }
 
     return (
         <div>
@@ -14,34 +45,37 @@ const AddClient = () => {
                 <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-slate-50">
                     <div className="w-full max-w-sm">
                         <form
+                            onSubmit={submitClientData}
                             className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
                         >
 
                             <div className="mb-4">
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                                    Name
+                                    Company Name
                                 </label>
                                 <input
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                    id="name"
                                     type="text"
-                                    placeholder="Full Name"
-                                    name='name'
+                                    value={clientData.companyName}
+                                    onChange={enterClientData}
+                                    placeholder="Company Name"
+                                    name='companyName'
                                     required
                                 ></input>
                             </div>
 
                             <div className="mb-4">
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                                    Username
+                                    Client Name
                                 </label>
                                 <input
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                    id="username"
                                     type="text"
-                                    placeholder="Username"
+                                    value={clientData.clientName}
+                                    onChange={enterClientData}
+                                    placeholder="Client Name"
                                     required
-                                    name='username'
+                                    name='clientName'
                                 ></input>
                             </div>
 
@@ -51,8 +85,9 @@ const AddClient = () => {
                                 </label>
                                 <input
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                    id="emain"
                                     type="email"
+                                    value={clientData.email}
+                                    onChange={enterClientData}
                                     placeholder="Email Address"
                                     name='email'
                                     required
@@ -61,32 +96,33 @@ const AddClient = () => {
 
                             <div className="mb-2">
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                                    Password
+                                    Phone Number
                                 </label>
                                 <input
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                                    id="password"
-                                    type="password"
-                                    placeholder="Password"
-                                    name='password'
+                                    type="text"
+                                    value={clientData.phoneNumber}
+                                    onChange={enterClientData}
+                                    placeholder="Phone Number"
+                                    name='phoneNumber'
                                     required
                                 ></input>
 
                             </div>
 
-                            <div className='mb-2'>
-                                <label className="block text-gray-700 text-sm font-bold mb-2">Select a User Role</label>
-                                <select
-                                    id="countries"
+                            <div className="mb-2">
+                                <label className="block text-gray-700 text-sm font-bold mb-2">
+                                    Address
+                                </label>
+                                <textarea
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                                    name='user-role'
+                                    placeholder="Address"
+                                    value={clientData.address}
+                                    onChange={enterClientData}
+                                    name='address'
                                     required
-                                >
-                                    <option value=''>- Choose Role -</option>
-                                    <option value="manager">Manager</option>
-                                    <option value="approver">Approver</option>
-                                    <option value="user">User</option>
-                                </select>
+                                ></textarea>
+
                             </div>
 
                             {/* {
@@ -118,15 +154,36 @@ const AddClient = () => {
                                     onClick={() => {
                                         const confirm = window.confirm('Are you sure you want to cancel')
                                         if (confirm) {
+                                            setClientData({
+                                                companyName: '',
+                                                clientName: '',
+                                                email: '',
+                                                phoneNumber: '',
+                                                address: ''
+                                            })
                                             setPopUp(false)
                                         } else {
                                             return;
                                         }
                                     }}
-                                    >
+                                >
                                     Cancel
                                 </button>
                             </div>
+
+                            {
+                                clientCreatedSuccess &&
+                                <div>
+                                    <p className='text-sm bg-green-100 text-green-500 font-semibold py-2 px-3 rounded-md mt-2'>{clientCreatedSuccess}</p>
+                                </div>
+                            }
+                            
+                            {
+                                clientCreatedErr &&
+                                <div>
+                                    <p className='text-sm bg-red-100 text-red-500 font-semibold py-2 px-3 rounded-md mt-2'>{clientCreatedErr}</p>
+                                </div>
+                            }
 
                         </form>
                     </div>
