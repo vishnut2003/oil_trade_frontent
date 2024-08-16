@@ -1,8 +1,7 @@
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar/Sidebar";
-import Header from "@/components/Header/Header"
-import { Viewport } from 'next';
+import Header from "@/components/Header/Header";
 
 const montserrat = Montserrat({ weight: '500', subsets: ["latin"] });
 

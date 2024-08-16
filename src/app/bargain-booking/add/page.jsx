@@ -23,10 +23,18 @@ const salesBargainAdd = () => {
     const [locations, setLocations] = useState([])
     const [locationSearch, setLocationSearch] = useState('')
 
+    // Client dropdown
+    const [clients, setClients] = useState([]);
+    const [clientsPopup, setClientsPopup] = useState(false);
+    const [clientSearch, setClientSearch] = useState('');
+
     const [salesBargainForm, setSalesBargainForm] = useState({
         location: '',
         products: [],
-        bargainNo: `BRGNO/${new Date().toISOString().substring(0, 10).split('-').join('')}/${Math.floor(100000 + Math.random() * 900000)}`
+        bargainNo: `BRGNO/${new Date().toISOString().substring(0, 10).split('-').join('')}/${Math.floor(100000 + Math.random() * 900000)}`,
+        client: {},
+        discount: '',
+        validity: new Date().toISOString().substring(0, 10)
     })
 
     useEffect(() => {
@@ -37,12 +45,21 @@ const salesBargainAdd = () => {
             .catch((err) => {
                 console.log(err)
             })
+
         axios.get(`${server}/products/all`)
             .then((res) => {
                 setProducts(res.data)
             })
             .catch((err) => {
                 console.log(err)
+            })
+
+        axios.get(`${server}/clients/get-all`)
+            .then((res) => {
+                setClients(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
             })
     }, [server])
 
@@ -61,6 +78,13 @@ const salesBargainAdd = () => {
         //         setPurchaseCreateFailed(err.response.data);
         //         setTimeout(() => setPurchaseCreateFailed(''), 5000);
         //     })
+    }
+
+    function enterSalesBargainFormData(e) {
+        setSalesBargainForm({
+            ...salesBargainForm,
+            [e.target.name]: e.target.value
+        })
     }
 
     return (
@@ -120,7 +144,7 @@ const salesBargainAdd = () => {
                                         </span>
                                 }
                             </div>
-                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full  shadow-md z-10 ${productPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
+                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full  shadow-md z-20 ${productPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
                                 <input
                                     type="text"
                                     value={productSearch}
@@ -261,7 +285,7 @@ const salesBargainAdd = () => {
                                         <p>Select Location</p>
                                 }
                             </div>
-                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full shadow-md ${locationPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
+                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full shadow-md z-10 ${locationPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
                                 <input
                                     type="text"
                                     value={locationSearch}
@@ -298,6 +322,79 @@ const salesBargainAdd = () => {
                                     ))}
                                 </ul>
                             </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className='relative'>
+                            <label className='text-xs'>Buyer</label>
+                            <div
+                                onClick={() => setClientsPopup(true)}
+                                className='p-3 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2' >
+                                {
+                                    salesBargainForm.client.companyName ?
+                                        <p>{salesBargainForm.client.companyName}</p> : <p>Selected item</p>
+                                }
+                            </div>
+                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full shadow-md ${clientsPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
+                                <input
+                                    onChange={(e) => {
+                                        setClientSearch(e.target.value);
+                                    }}
+                                    placeholder='Search Clients'
+                                    className='border border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
+                                <ul className='flex gap-1 flex-col'>
+                                    {clients.filter(client => {
+                                        const clientName = client.companyName.toLowerCase();
+                                        const searchClient = clientSearch.toLowerCase();
+                                        if (!searchClient) return client;
+                                        else {
+                                            if (clientName.includes(searchClient)) {
+                                                return client;
+                                            }
+                                        }
+                                    }).map((client) => (
+                                        <li
+                                            onClick={() => {
+                                                setSalesBargainForm({
+                                                    ...salesBargainForm,
+                                                    client: client
+                                                });
+                                                setClientsPopup(false);
+                                            }}
+                                            key={client._id}
+                                            className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center gap-2'>
+                                            <div className='flex flex-col gap-1'>
+                                                <p className='text-sm text-slate-900 font-semibold'>{client.companyName}</p>
+                                                <p className='text-xs text-slate-500 font-thin text-ellipsis line-clamp-1'>{client.clientCode}</p>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className='flex gap-2'>
+                        <div className='flex flex-col gap-1 grow'>
+                            <label className='text-xs'>Discount</label>
+                            <input
+                                className='p-2 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2'
+                                type="number"
+                                value={salesBargainForm.discount}
+                                onChange={enterSalesBargainFormData}
+                                name="discount"
+                            />
+                        </div>
+                        <div className='flex flex-col gap-1 grow'>
+                            <label className='text-xs'>Validity</label>
+                            <input
+                                value={salesBargainForm.validity}
+                                onChange={enterSalesBargainFormData}
+                                className='p-2 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2'
+                                type="date"
+                                name="validity"
+                            />
                         </div>
                     </div>
 

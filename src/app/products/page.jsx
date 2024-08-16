@@ -349,22 +349,26 @@ const Products = () => {
               <tr className='border-b border-slate-200'>
                 <th className='py-2 px-4'>Product Name</th>
                 <th className='py-2 px-4'>Stock</th>
+                <th className='py-2 px-4'>V-Stock</th>
                 <th className='py-2 px-4'>Price</th>
                 <th className='py-2 px-4'></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className='text-sm'>
               {
                 productLists.map((product, index) => (
                   <tr>
                     <td className='py-2 px-4'>
                       <p className='text-left font-semibold'>{product.name}</p>
                     </td>
-                    <td className='py-2 px-4'>
+                    <td className='py-2 px-4 font-semibold'>
                       <p>{product.qty} </p>
                     </td>
+                    <td className='py-2 px-4 font-semibold'>
+                      <p>{product.vQty} </p>
+                    </td>
                     <td className='py-2 px-4'>
-                      <p className='text-right font-semibold'>{product.price} &#8377;</p>
+                      <p className='text-left font-semibold text-green-600'>{product.price} &#8377;</p>
                     </td>
                     <td className='py-2 px-4'>
                       <button
