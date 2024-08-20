@@ -28,14 +28,27 @@ const salesBargainAdd = () => {
     const [clientsPopup, setClientsPopup] = useState(false);
     const [clientSearch, setClientSearch] = useState('');
 
+    // Seller dropdown
+    const [sellerPopup, setSellerPopup] = useState(false);
+    const [sellers, setSellers] = useState([]);
+    const [sellerSearch, setSellerSearch] = useState('');
+
     const [salesBargainForm, setSalesBargainForm] = useState({
-        location: '',
+        location: {},
         products: [],
         bargainNo: `BRGNO/${new Date().toISOString().substring(0, 10).split('-').join('')}/${Math.floor(100000 + Math.random() * 900000)}`,
         client: {},
         discount: '',
-        validity: new Date().toISOString().substring(0, 10)
+        validity: new Date().toISOString().substring(0, 10),
+        bargainDate: new Date().toISOString().substring(0, 10),
+        deliveryTerms: '',
+        seller: {}
     })
+
+    function salesCreateDataError(err) {
+        setSalesCreateFailed(err);
+        setTimeout(() => setSalesCreateFailed(''), 5000);
+    }
 
     useEffect(() => {
         axios.get(`${server}/sales/location/get-all`)
@@ -61,23 +74,44 @@ const salesBargainAdd = () => {
             .catch((err) => {
                 console.log(err);
             })
+
+        axios.get(`${server}/users`)
+            .then((res) => {
+                setSellers(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            })
     }, [server])
 
     const submitSalesBargain = (e) => {
         e.preventDefault();
         console.log(salesBargainForm)
-        // setPurchaseCreateLoading(true)
-        // axios.post(`${server}/purchase/create-purchase`, salesBargainForm)
-        //     .then((res) => {
-        //         setPurchaseCreateLoading(false);
-        //         setPurchaseCreateSuccess(res.data);
-        //         setTimeout(() => setPurchaseCreateSuccess(''), 5000);
-        //     })
-        //     .catch((err) => {
-        //         setPurchaseCreateLoading(false);
-        //         setPurchaseCreateFailed(err.response.data);
-        //         setTimeout(() => setPurchaseCreateFailed(''), 5000);
-        //     })
+
+        if(Object.keys(salesBargainForm.client).length === 0) {
+            return salesCreateDataError('Buyer not selected!');
+        }
+
+        if(Object.keys(salesBargainForm.location).length === 0) {
+            return salesCreateDataError('Location not selected!');
+        }
+
+        if(Object.keys(salesBargainForm.seller).length === 0) {
+            return salesCreateDataError('Seller not selected!');
+        }
+
+        if(salesBargainForm.products.length === 0) {
+            return salesCreateDataError('No products selected!');
+        }
+
+        setSalesCreateLoading(true)
+        axios.post(`${server}/sales/bargain/create`, salesBargainForm)
+            .then((res) => {
+                console.log(res);
+            })
+            .catch((err) => {
+                console.group(err);
+            })
     }
 
     function enterSalesBargainFormData(e) {
@@ -88,7 +122,7 @@ const salesBargainAdd = () => {
     }
 
     return (
-        <div className='flex justify-center md:justify-start'>
+        <div className='flex justify-center md:justify-start pb-14'>
             <div className='w-full max-w-xl flex flex-col gap-4'>
                 <h2>Add Sales Bargain</h2>
                 <form className='w-full flex flex-col gap-2' onSubmit={submitSalesBargain}>
@@ -108,7 +142,7 @@ const salesBargainAdd = () => {
                         </div>
                     </div>
                     <div>
-                        <div className='relative'>
+                        <div className='relative z-30'>
                             <label className='text-xs'>Products</label>
                             <div
                                 onClick={() => {
@@ -144,7 +178,7 @@ const salesBargainAdd = () => {
                                         </span>
                                 }
                             </div>
-                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full  shadow-md z-20 ${productPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
+                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full  shadow-md ${productPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
                                 <input
                                     type="text"
                                     value={productSearch}
@@ -272,7 +306,7 @@ const salesBargainAdd = () => {
                     }
 
                     <div>
-                        <div className='relative'>
+                        <div className='relative z-20'>
                             <label className='text-xs'>Location</label>
                             <div
                                 onClick={() => {
@@ -280,12 +314,12 @@ const salesBargainAdd = () => {
                                 }}
                                 className='p-3 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2' >
                                 {
-                                    salesBargainForm.location ?
+                                    salesBargainForm.location.location ?
                                         <p>{salesBargainForm.location.location}</p> :
                                         <p>Select Location</p>
                                 }
                             </div>
-                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full shadow-md z-10 ${locationPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
+                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full shadow-md ${locationPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
                                 <input
                                     type="text"
                                     value={locationSearch}
@@ -326,7 +360,7 @@ const salesBargainAdd = () => {
                     </div>
 
                     <div>
-                        <div className='relative'>
+                        <div className='relative z-10'>
                             <label className='text-xs'>Buyer</label>
                             <div
                                 onClick={() => setClientsPopup(true)}
@@ -381,6 +415,7 @@ const salesBargainAdd = () => {
                             <input
                                 className='p-2 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2'
                                 type="number"
+                                required
                                 value={salesBargainForm.discount}
                                 onChange={enterSalesBargainFormData}
                                 name="discount"
@@ -395,6 +430,87 @@ const salesBargainAdd = () => {
                                 type="date"
                                 name="validity"
                             />
+                        </div>
+                    </div>
+
+                    <div className='flex gap-2'>
+                        <div className='flex flex-col gap-1 grow'>
+                            <label className='text-xs'>Bargain Date</label>
+                            <input
+                            onChange={enterSalesBargainFormData}
+                            value={salesBargainForm.bargainDate}
+                                className='p-2 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2'
+                                type="date"
+                                name="bargainDate" />
+                        </div>
+                        <div className='flex flex-col gap-1 grow'>
+                            <label className='text-xs'>Delivery Terms</label>
+                            <select
+                                required
+                                value={salesBargainForm.deliveryTerms}
+                                onChange={enterSalesBargainFormData}
+                                className='p-2 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2'
+                                name="deliveryTerms">
+                                <option value="">- Select Options -</option>
+                                <option value="FOR">FOR</option>
+                                <option value="EXW">EXW</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className='relative z-0'>
+                            <label className='text-xs'>Seller</label>
+                            <div
+                                onClick={() => setSellerPopup(!sellerPopup)}
+                                className='p-3 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2'>
+                                    {
+                                        salesBargainForm.seller.name ?  <p>{salesBargainForm.seller.name}</p> : <p>Select Seller</p>
+                                    }
+                               
+                            </div>
+                            <div className={`transition-all absolute top-16 left-0 bg-white rounded-md shadow-md w-full max-h-52 overflow-auto ${sellerPopup ? 'p-4 h-60' : 'p-0 h-0'}`}>
+                                <div>
+                                    <input
+                                        value={sellerSearch}
+                                        onChange={(e) => {
+                                            setSellerSearch(e.target.value)
+                                        }}
+                                        className='text-xs bg-white py-2 px-3 rounded-md border border-slate-200 w-full'
+                                        type="text"
+                                        placeholder='Search Seller by Email' />
+                                </div>
+                                <div className='flex flex-col gap-2 pt-4'>
+                                    {sellers.filter((seller) => {
+                                        const searchText = sellerSearch.toLocaleLowerCase();
+                                        const smallerEmail = seller.email.toLocaleLowerCase();
+                                        if(smallerEmail.includes(searchText) || !searchText) {
+                                            return seller;
+                                        }
+                                    }).map((seller) => (
+                                        <div 
+                                        onClick={() => {
+                                            setSalesBargainForm({
+                                                ...salesBargainForm,
+                                                seller: seller
+                                            })
+                                            setSellerPopup(false);
+                                        }}
+                                        key={seller._id} 
+                                        className='flex justify-between items-center'>
+                                            <div className='w-max'>
+                                                <p className='text-sm font-semibold'>{seller.name}</p>
+                                                <p className='text-xs'>{seller.email}</p>
+                                            </div>
+                                            <div>
+                                                {
+                                                    salesBargainForm.seller._id === seller._id && <FontAwesomeIcon icon={faCheck} width={'20px'} className='text-blue-500' />
+                                                }
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
