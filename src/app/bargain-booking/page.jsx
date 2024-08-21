@@ -1,7 +1,10 @@
 'use client';
 
 import AddSalesLocation from '@/components/AddSalesLocation/AddSalesLocation';
+import BargainSalesViewPopup from '@/components/BargainSalesViewPopup/BargainSalesViewPopup';
 import domainName from '@/domainName';
+import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -17,10 +20,21 @@ const BargainBooking = () => {
   const [locationChangesErr, setLocationChangesErr] = useState('');
   const [locationChangesSuccess, setLocationChangesSuccess] = useState('');
 
+  const [salesBargains, setSalesBargains] = useState([]);
+  const [salesViewPopup, setSalesViewPopup] = useState(false)
+
   useEffect(() => {
     axios.get(`${server}/sales/location/get-all`)
       .then((res) => {
         setLocations(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+
+    axios.get(`${server}/sales/bargain/get-all`)
+      .then((res) => {
+        setSalesBargains(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -43,6 +57,82 @@ const BargainBooking = () => {
         <Link href={'/bargain-booking/add'}>
           <button className='px-3 py-2 bg-blue-600 text-white text-sm shadow-md shadow-blue-600/50 rounded-md'>Add Bargain Sales</button>
         </Link>
+      </div>
+
+      <div className='bg-white p-2 w-full md:max-w-screen-md rounded-md shadow-md shadow-slate-200'>
+        <table className='w-full text-left'>
+          <thead className='border-b border-slate-100'>
+            <tr>
+              <th className='py-2 px-4 text-sm'>Bargain Date</th>
+              <th className='py-2 px-4 text-sm'>Bargain No.</th>
+              <th className='py-2 px-4 text-sm'>Created At</th>
+              <th className='py-2 px-4 text-sm'>Status</th>
+              <th className='py-2 px-4 text-sm'></th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              salesBargains.length !== 0 ?
+                salesBargains.map((bargain) => (
+                  <tr key={bargain.bargainNo}>
+                    <td className='py-2 px-4 text-sm'>{bargain.bargainDate.substring(0, 10).split('-').join('/')}</td>
+                    <td className='py-2 px-4 text-sm'>{bargain.bargainNo}</td>
+                    <td className='py-2 px-4 text-sm'>{bargain.createdAt.substring(0, 10).split('-').join('/')}</td>
+                    <td className='py-2 px-4 text-sm'>
+                      {
+                        bargain.status === 'pending' && <p className='text-sm py-1 px-2 rounded-md bg-red-200 text-red-500 font-semibold w-max'>Pending</p>
+                      }
+                      {
+                        bargain.status === 'partial' && <p className='text-sm py-1 px-2 rounded-md bg-yellow-200 text-yellow-500 font-semibold w-max'>Partial</p>
+                      }
+                      {
+                        bargain.status === 'complete' && <p className='text-sm py-1 px-2 rounded-md bg-green-200 text-green-500 font-semibold w-max'>complete</p>
+                      }
+
+                    </td>
+                    <td className='py-2 px-4 text-sm'>
+                      <FontAwesomeIcon
+                        onClick={() => setSalesViewPopup(true)}
+                        icon={faAngleDown} width={'15px'} className='cursor-pointer' />
+                      {
+                        salesViewPopup &&
+                        <div className='fixed top-0 left-0 w-full h-full flex justify-center items-center'>
+                          <div className='p-2 drop-shadow-2xl bg-white rounded-md'>
+                            <BargainSalesViewPopup salesBargainId={bargain._id}>
+                              <div className='flex flex-nowrap gap-2 justify-between border-b border-slate-100 pb-3'>
+                                <div>
+                                  <h2 className='text-base font-semibold'>Sales Bargain Details</h2>
+                                </div>
+                                <div>
+                                  <p
+                                    onClick={() => {
+                                      setSalesViewPopup(false)
+                                      axios.get(`${server}/sales/bargain/get-all`)
+                                        .then((res) => {
+                                          setSalesBargains(res.data);
+                                        })
+                                        .catch((err) => {
+                                          console.log(err);
+                                        })
+                                    }}
+                                    className='text-sm text-red-500 font-semibold cursor-pointer'>Close</p>
+                                </div>
+                              </div>
+                            </BargainSalesViewPopup>
+                          </div>
+                        </div>
+                      }
+
+                    </td>
+                  </tr>
+                )) :
+                <tr>
+                  <td className='py-2 px-4 text-sm'>Sales Bargain is empty!</td>
+
+                </tr>
+            }
+          </tbody>
+        </table>
       </div>
 
       <hr color='#cecece' />

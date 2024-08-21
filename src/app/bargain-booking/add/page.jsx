@@ -107,10 +107,13 @@ const salesBargainAdd = () => {
         setSalesCreateLoading(true)
         axios.post(`${server}/sales/bargain/create`, salesBargainForm)
             .then((res) => {
-                console.log(res);
+                setSalesCreateSuccess(res.data)
+                setSalesCreateLoading(false);
+                setTimeout(() => setSalesCreateSuccess(''), 5000);
             })
             .catch((err) => {
-                console.group(err);
+                salesCreateDataError(err.response.data);
+                setSalesCreateLoading(false);
             })
     }
 
