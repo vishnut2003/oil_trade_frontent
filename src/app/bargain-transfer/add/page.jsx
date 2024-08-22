@@ -4,366 +4,219 @@ import domainName from '@/domainName';
 import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
 const BargainTransferAdd = () => {
 
     const server = domainName();
-    const [purchaseCreateLoading, setPurchaseCreateLoading] = useState(false);
-    const [purchaseCreateSuccess, setPurchaseCreateSuccess] = useState('');
-    const [purchaseCreateFailed, setPurchaseCreateFailed] = useState('')
+    const [submitError, setSubmitError] = useState('');
 
-    // products dropdown
-    const [productPopup, setProductPopup] = useState(false);
-    const [products, setProducts] = useState([])
-    const [productSearch, setProductSearch] = useState('')
+    const [purchaseBargains, setPurchaseBargains] = useState([]);
+    const [bargainNoDropdown, setBargainNoDropdown] = useState(false);
+    const [bargainNoSearch, setBargainNoSearch] = useState('');
 
-    // location dropdown
-    const [locationPopup, setLocationPopup] = useState(false);
-    const [locations, setLocations] = useState([])
-    const [locationSearch, setLocationSearch] = useState('')
-
-    const [purchaseForm, setPurchaseForm] = useState({
-        location: '',
+    const [transferEntry, setTransferEntry] = useState({
+        bargainNo: '',
         products: [],
-        bargainDate: new Date().toISOString().substring(0, 10),
-        bargainNo: ''
+        prevBargain: {},
+        newBargainNo: '',
+        remarks: ''
     })
 
     useEffect(() => {
-        axios.get(`${server}/purchase/location/get-all`)
+        axios.get(`${server}/purchase/get-all`)
             .then((res) => {
-                setLocations(res.data)
+                setPurchaseBargains(res.data)
             })
             .catch((err) => {
-                console.log(err)
-            })
-        axios.get(`${server}/products/all`)
-            .then((res) => {
-                setProducts(res.data)
-            })
-            .catch((err) => {
-                console.log(err)
+                console.log(err);
             })
     }, [server])
 
-    const submitPurchase = (e) => {
+    function submitTransferEntry (e) {
         e.preventDefault();
-        setPurchaseCreateLoading(true)
-        axios.post(`${server}/purchase/create-purchase`, purchaseForm)
+
+        // Validate
+        if(transferEntry.bargainNo.length === 0) return setSubmitError('Select against bargain No.');
+        
+        axios.post(`${server}/bargain-transfer/create`, transferEntry)
             .then((res) => {
-                setPurchaseCreateLoading(false);
-                setPurchaseCreateSuccess(res.data);
-                setTimeout(() => setPurchaseCreateSuccess(''), 5000);
+                console.log(res);
             })
             .catch((err) => {
-                setPurchaseCreateLoading(false);
-                setPurchaseCreateFailed(err.response.data);
-                setTimeout(() => setPurchaseCreateFailed(''), 5000);
+                console.log(err);
             })
     }
 
     return (
         <div className='flex justify-center md:justify-start'>
             <div className='w-full max-w-xl flex flex-col gap-4'>
-                <h2>Add Purchase</h2>
-                <form className='w-full flex flex-col gap-2' onSubmit={submitPurchase}>
+                <h2>Add Bargain Transfer</h2>
+                <form className='w-full flex flex-col gap-2' onSubmit={submitTransferEntry}>
                     <div className='flex gap-2'>
                         <div className='flex flex-col gap-1 w-1/2'>
-                            <label className='text-xs'>Company Bargain Date</label>
-                            <input
-                                type="date"
-                                required
-                                value={purchaseForm.bargainDate}
-                                onChange={(e) => {
-                                    setPurchaseForm({
-                                        ...purchaseForm,
-                                        bargainDate: e.target.value
-                                    })
-                                }}
-                                className='px-5 py-2 bg-white rounded-sm text-sm border-b border-slate-300 text-slate-500' />
-                        </div>
-                        <div className='flex flex-col gap-1 w-1/2'>
                             <label className='text-xs'>Current Date</label>
-                            <input type="date" required disabled className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-slate-500' value={new Date().toISOString().substring(0, 10)} />
+                            <input type="date" required disabled className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-slate-500 bg-white' value={new Date().toISOString().substring(0, 10)} />
                         </div>
                     </div>
                     <div>
-                        <div className='relative'>
-                            <label className='text-xs'>Products</label>
-                            <div
-                                onClick={() => {
-                                    setProductPopup(!productPopup)
-                                }}
-                                className='p-3 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2' >
+                        <div className='flex flex-col gap-1 w-full relative'>
+                            <label className='text-xs'>Select Bargain</label>
+                            <div onClick={() => setBargainNoDropdown(!bargainNoDropdown)} className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-slate-500 w-full bg-white'>
                                 {
-                                    purchaseForm.products.length > 0 ?
-                                        purchaseForm.products.map((product) => (
-                                            <span className='bg-slate-200 px-3 py-1 rounded-md' key={product._id}>
-                                                {product.name}
-                                                <FontAwesomeIcon
-                                                    onClick={() => {
-                                                        setPurchaseForm(prevData => {
-                                                            const latestProductList = prevData.products.filter((filterProduct) => {
-                                                                if (filterProduct._id !== product._id) {
-                                                                    return filterProduct
-                                                                }
-                                                            })
-                                                            return {
-                                                                ...prevData,
-                                                                products: latestProductList
-                                                            }
-                                                        })
-                                                    }}
-                                                    className='text-red-600 ml-2 cursor-pointer'
-                                                    width={10}
-                                                    icon={faXmark} />
-                                            </span>
-                                        )) :
-                                        <span className=' px-3 py-1 rounded-md'>
-                                            Select products
-                                        </span>
+                                    transferEntry.bargainNo ? transferEntry.bargainNo : <>Select Bargain No.</>
                                 }
-                            </div>
-                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full  shadow-md z-10 ${productPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
-                                <input
-                                    type="text"
-                                    value={productSearch}
-                                    onChange={(e) => {
-                                        setProductSearch(e.target.value)
-                                    }}
-                                    placeholder='Search product'
-                                    className='border border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
-                                <ul className='flex gap-1 flex-col'>
-                                    {products.filter((product) => {
-                                        const searchText = productSearch.toLocaleLowerCase()
-                                        const productName = product.name.toLocaleLowerCase()
-                                        if (productName.includes(searchText)) {
-                                            return product
-                                        }
-                                    }).map((product) => (
-                                        <li
-                                            key={product._id}
-                                            onClick={() => {
-                                                let productExist = false;
-                                                purchaseForm.products.map((purchaseProduct) => {
-                                                    if(purchaseProduct._id === product._id) {
-                                                        productExist = true
-                                                    }
-                                                })
 
-                                                if (!productExist) {
-                                                    const { name, _id } = product
-                                                    const newProduct = {
-                                                        name,
-                                                        _id,
-                                                        price: '',
-                                                        qty: '',
-                                                        weightInMT: ''
-                                                    }
-                                                    setPurchaseForm({
-                                                        ...purchaseForm,
-                                                        products: [...purchaseForm.products, newProduct]
-                                                    })
-                                                }
+                            </div>
+
+                            {/* Bargain no. selecting popup */}
+                            {
+                                bargainNoDropdown &&
+                                <div className='p-3 bg-white w-full flex flex-col gap-3 shadow-md absolute top-0 left-0 z-10'>
+                                    <div>
+                                        <input
+                                            value={bargainNoSearch}
+                                            onChange={(e) => {
+                                                setBargainNoSearch(e.target.value)
                                             }}
-                                            className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center'>
-                                            <div className='flex flex-col gap-1'>
-                                                <p className='text-sm font-semibold text-black'>{product.name}</p>
+                                            type="text"
+                                            placeholder="Seach Bargain No."
+                                            className='text-sm py-2 px-3 rounded-md border border-slate-200 w-full' />
+                                    </div>
+                                    <div>
+                                        {purchaseBargains.filter((bargains) => {
+                                            const search = bargainNoSearch.toLocaleLowerCase();
+                                            const bargainNo = bargains.bargainNo.toLocaleLowerCase();
+
+                                            if (bargainNo.includes(search) || !search) {
+                                                return bargains;
+                                            }
+
+                                        }).map((bargains) => (
+                                            <div
+                                                onClick={() => {
+                                                    setTransferEntry({
+                                                        bargainNo: bargains.bargainNo,
+                                                        products: bargains.products,
+                                                        prevBargain: bargains
+                                                    })
+                                                    setBargainNoDropdown(false)
+                                                }}
+                                                className='flex flex-nowrap justify-between items-center p-2 hover:bg-blue-50 cursor-pointer rounded-md'>
+                                                <div className='text-sm font-semibold flex flex-col'>
+                                                    <p>{bargains.bargainNo}</p>
+                                                    <p className='text-xs font-thin'>{bargains.bargainDate.substring(0, 10).split('-').join('/')}</p>
+                                                </div>
+                                                <div>
+                                                    {
+                                                        bargains.bargainNo === transferEntry.bargainNo &&
+                                                        <FontAwesomeIcon icon={faCheck} width={'20px'} className='text-blue-500' />
+                                                    }
+                                                </div>
                                             </div>
-                                            {/* {
-                                                purchaseForm.products.includes(product.name) &&
-                                                <FontAwesomeIcon icon={faCheck} width={15} className='text-blue-600' />
-                                            } */}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    {
-                        purchaseForm.products.length !== 0 &&
-                        <div className='flex flex-col gap-2 border border-slate-200 p-3 rounded-md bg-white'>
-                            {purchaseForm.products.map((product) => (
-                                <div className='flex flex-col md:flex-row flex-nowrap justify-between gap-2 md:items-center border-b border-slate-200 pb-2' key={product._id}>
-                                    <p className='text-sm'>{product.name}</p>
-                                    <div className='flex flex-nowrap gap-2'>
-                                        <input
-                                            type="number"
-                                            required
-                                            placeholder='Price'
-                                            value={product.price}
-                                            onChange={(e) => {
-                                                setPurchaseForm(formData => {
-                                                    let itemIndex;
-                                                    formData.products.filter((filterProduct, index) => {
-                                                        if(filterProduct._id === product._id) {
-                                                            itemIndex = index
-                                                        }
-                                                    })
-
-                                                    const copyFormData = [...formData.products]
-                                                    copyFormData[itemIndex].price = e.target.value
-
-                                                    const updatedFormData = {
-                                                        ...formData,
-                                                        products: copyFormData
-                                                    }
-                                                    return updatedFormData
-                                                })
-                                            }}
-                                            className='max-w-24 w-full py-1 px-3 text-sm border border-slate-200 rounded-md'
-                                        />
-
-                                        <input
-                                            type="number"
-                                            required
-                                            placeholder='qty'
-                                            value={product.qty}
-                                            onChange={(e) => {
-                                                setPurchaseForm(formData => {
-                                                    let itemIndex;
-                                                    formData.products.filter((filterProduct, index) => {
-                                                        if(filterProduct._id === product._id) {
-                                                            itemIndex = index
-                                                        }
-                                                    })
-
-                                                    const copyFormData = [...formData.products]
-                                                    copyFormData[itemIndex].qty = e.target.value
-
-                                                    const updatedFormData = {
-                                                        ...formData,
-                                                        products: copyFormData
-                                                    }
-                                                    return updatedFormData
-                                                })
-                                            }}
-                                            className='max-w-24 w-full py-1 px-3 text-sm border border-slate-200 rounded-md'
-                                        />
-                                        
-                                        <input
-                                            type="number"
-                                            required
-                                            placeholder='W in MT'
-                                            value={product.weightInMT}
-                                            onChange={(e) => {
-                                                setPurchaseForm(formData => {
-                                                    let itemIndex;
-                                                    formData.products.filter((filterProduct, index) => {
-                                                        if(filterProduct._id === product._id) {
-                                                            itemIndex = index
-                                                        }
-                                                    })
-
-                                                    const copyFormData = [...formData.products]
-                                                    copyFormData[itemIndex].weightInMT = e.target.value
-
-                                                    const updatedFormData = {
-                                                        ...formData,
-                                                        products: copyFormData
-                                                    }
-                                                    return updatedFormData
-                                                })
-                                            }}
-                                            className='max-w-24 w-full py-1 px-3 text-sm border border-slate-200 rounded-md'
-                                        />
+                                        ))}
                                     </div>
                                 </div>
-                            ))}
+                            }
+
                         </div>
-                    }
-                    <div>
-                        <div className='flex flex-col gap-1'>
-                            <label className='text-xs'>Company Bargain No.</label>
-                            <input
-                                required
-                                value={purchaseForm.bargainNo}
-                                onChange={(e) => {
-                                    setPurchaseForm({
-                                        ...purchaseForm,
-                                        bargainNo: e.target.value
-                                    })
-                                }}
-                                type="text"
-                                className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
-                        </div>
-                    </div>
-                    <div>
-                        <div className='relative'>
-                            <label className='text-xs'>Location</label>
-                            <div
-                                onClick={() => {
-                                    setLocationPopup(!locationPopup)
-                                }}
-                                className='p-3 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2' >
+                        <div className='p-2'>
+                            <div className='flex flex-col gap-1 w-full relative'>
                                 {
-                                    purchaseForm.location ?
-                                        <p>{purchaseForm.location.location}</p> :
-                                        <p>Select Location</p>
+                                    transferEntry.products.length !== 0 &&
+                                    <h2 className='text-sm font-bold'>Update Price</h2>
                                 }
-                            </div>
-                            <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full shadow-md ${locationPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
-                                <input
-                                    type="text"
-                                    value={locationSearch}
-                                    onChange={(e) => {
-                                        setLocationSearch(e.target.value)
-                                    }}
-                                    placeholder='Search Location'
-                                    className='border border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
-                                <ul className='flex gap-1 flex-col'>
-                                    {locations.filter((location) => {
-                                        const search = locationSearch.toLocaleLowerCase()
-                                        const locationName = location.location.toLocaleLowerCase()
-                                        if (locationName.includes(search)) return location
-                                    }).map((location, index) => (
-                                        <li
-                                            onClick={() => {
-                                                setPurchaseForm({
-                                                    ...purchaseForm,
-                                                    location: location
-                                                })
-                                                setLocationPopup(false)
-                                            }}
-                                            key={index}
-                                            className='flex justify-between cursor-pointer px-3 py-2 rounded-md hover:bg-slate-100 items-center gap-2'>
-                                            <div className='flex flex-col gap-1'>
-                                                <p className='text-sm text-slate-900 font-semibold'>{location.location}</p>
-                                                <p className='text-xs text-slate-500 font-thin text-ellipsis line-clamp-1'>{location.address}</p>
-                                            </div>
-                                            {
-                                                location === purchaseForm.location &&
-                                                <FontAwesomeIcon icon={faCheck} width={15} className='text-blue-600' />
-                                            }
-                                        </li>
-                                    ))}
-                                </ul>
+                                {transferEntry.products.map((product, index) => (
+                                    < div className='text-sm font-semibold flex flex-nowrap gap-2 justify-between items-center py-2 px-3 bg-white hover:bg-blue-100 border-b border-slate-300 rounded-md'>
+                                        <div className='w-max'>
+                                            <p>{product.name}</p>
+                                        </div>
+                                        <div className='grow max-w-28'>
+                                            <input
+                                                required
+                                                value={product.price}
+                                                onChange={(e) => {
+                                                    setTransferEntry(prevEntry => {
+                                                        prevEntry.products[index].price = e.target.value;
+                                                        return {
+                                                            ...transferEntry,
+                                                            products: prevEntry.products
+                                                        }
+                                                    })
+                                                }}
+                                                type="number"
+                                                placeholder='Price'
+                                                className='w-full box-border py-2 px-3 border border-slate-400 rounded-md' />
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
-                    <button className='px-3 py-2 bg-blue-600 text-white text-sm shadow-md shadow-blue-600/50 rounded-md flex justify-center items-center gap-2'>
-                        {
-                            purchaseCreateLoading && 
-                            <div className='w-4 h-4 rounded-full border border-b-0 border-r-0 animate-spin'></div>
-                        }
-                        Create Purchase
-                    </button>
+                    <div>
+                        <div className='flex flex-col gap-1 w-full'>
+                            <label className='text-xs'>New Bargain No.</label>
+                            <input 
+                            value={transferEntry.newBargainNo}
+                            onChange={(e) => setTransferEntry({
+                                ...transferEntry,
+                                newBargainNo: e.target.value
+                            })}
+                            type="text" 
+                            required 
+                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-slate-500 bg-white'/>
+                        </div>
+                    </div>
+                    <div>
+                        <div className='flex flex-col gap-1 w-full'>
+                            <label className='text-xs'>Remarks</label>
+                            <textarea 
+                            value={transferEntry.remarks}
+                            onChange={(e) => setTransferEntry({
+                                ...transferEntry,
+                                remarks: e.target.value
+                            })}
+                            type="text" 
+                            required 
+                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-slate-500 bg-white'></textarea>
+                        </div>
+                    </div>
+
+                    {/* review against bargain */}
                     {
-                        purchaseCreateSuccess &&
-                        <div className='py-2 px-4 rounded-md bg-green-200 border border-green-500'>
-                            <p className='text-green-500 text-sm'>{purchaseCreateSuccess}</p>
+                        Object.keys(transferEntry.prevBargain).length !== 0 &&
+                        <div className='flex flex-col gap-2 bg-white p-3 rounded-md w-1/2 drop-shadow-md border border-slate-200'>
+                            <div className='flex flex-nowrap justify-between items-center gap-5'>
+                                <div className='text-left'>
+                                    <b className='text-sm'>Bargain No.</b>
+                                    <p className='text-xs'>112233333</p>
+                                </div>
+                                <div className='text-right'>
+                                    <b className='text-sm'>Bargain Date</b>
+                                    <p className='text-xs'>11/11/2001</p>
+                                </div>
+                            </div>
+                            <div className='flex flex-nowrap justify-between items-center gap-5'>
+                                <div className='text-left'>
+                                    <b className='text-sm'>Created At</b>
+                                    <p className='text-xs'>112233333</p>
+                                </div>
+                                <div className='text-left'>
+                                    <b className='text-sm'>Status</b>
+                                    <p className='text-xs'>Pending</p>
+                                </div>
+                            </div>
                         </div>
                     }
-                    {
-                        purchaseCreateFailed &&
-                        <div className='py-2 px-4 rounded-md bg-red-200 border border-red-500'>
-                            <p className='text-red-500 text-sm'>{purchaseCreateFailed}</p>
-                        </div>
-                    }
+
+                    <div>
+                        <button
+                            className='text-sm font-semibold bg-blue-500 text-white p-3 w-full rounded-md shadow-md shadow-blue-400'
+                            type='submit'>Create Transfer Bargain</button>
+                    </div>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }
 

@@ -69,7 +69,7 @@ const Sidebar = () => {
   return (
     <div className={
       sidebar ? 'fixed md:static flex flex-col gap-10 justify-between min-w-60 h-screen max-h-screen shadow-xl p-4 overflow-auto bg-white transition-all z-10' :
-        'static flex flex-col gap-10 justify-between min-w-0 md:min-w-60 w-10 h-screen max-h-screen shadow-xl md:p-4 overflow-hidden bg-white transition-all z-10'
+        'static flex flex-col gap-10 justify-between min-w-0 md:min-w-60 w-10 h-screen max-h-screen shadow-xl md:p-4 overflow-auto bg-white transition-all z-10'
     }>
       <div className='flex gap-2 items-center'>
         <div className={
@@ -103,7 +103,7 @@ const Sidebar = () => {
 
           {
             sidebarLinks.map((menu) => (
-              <li key={menu.id} className='cursor-pointer bg-white text-slate-600'>
+              <li key={menu.id} className='cursor-pointer bg-white text-slate-600 min-w-max'>
                 <Link
                   href={menu.path}
                   onClick={() => {
