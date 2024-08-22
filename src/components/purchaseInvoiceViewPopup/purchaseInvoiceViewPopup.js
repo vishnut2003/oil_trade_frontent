@@ -40,7 +40,7 @@ const PurchaseInvoiceViewPopup = ({ purchase, children }) => {
             {children}
             <div className='flex flex-nowrap justify-between'>
                 <div className='text-sm'>
-                    <b>Bargain Date</b>
+                    <b>Invoice No.</b>
                     <p>{purchase.invoiceNo}</p>
                 </div>
                 <div className='text-sm text-right'>

@@ -350,6 +350,7 @@ const Products = () => {
                 <th className='py-2 px-4'>Product Name</th>
                 <th className='py-2 px-4'>Stock</th>
                 <th className='py-2 px-4'>V-Stock</th>
+                <th className='py-2 px-4'>V-Sold</th>
                 <th className='py-2 px-4'>Price</th>
                 <th className='py-2 px-4'></th>
               </tr>
@@ -366,6 +367,9 @@ const Products = () => {
                     </td>
                     <td className='py-2 px-4 font-semibold'>
                       <p>{product.vQty} </p>
+                    </td>
+                    <td className='py-2 px-4 font-semibold'>
+                      <p>{product.vSoldQty} </p>
                     </td>
                     <td className='py-2 px-4'>
                       <p className='text-left font-semibold text-green-600'>{product.price} &#8377;</p>
