@@ -127,11 +127,15 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
                         }
                     }}
                     className='bg-red-500 text-sm font-semibold text-white py-2 px-4 rounded-md shadow-md shadow-red-500'>Delete</button>
-                <button
-                    onClick={() => {
-                        setQtyPopup(true)
-                    }}
-                    className='text-sm font-semibold text-blue-500'>Convert to Invoice</button>
+                {
+                    salesBargain.status !== 'complete' &&
+                    <button
+                        onClick={() => {
+                            setQtyPopup(true)
+                        }}
+                        className='text-sm font-semibold text-blue-500'>Convert to Invoice</button>
+                }
+
             </div>
 
             {
@@ -161,18 +165,18 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
                             </div>
                         ))}
 
-                        <button 
-                        onClick={() => {
-                            const {_id, createdAt, updatedAt, validity, status, bargainDate, ...salesEntry} = salesBargain;
-                            axios.post(`${server}/sales/invoice/create`, salesEntry)
-                                .then((res) => {
-                                    console.log(res);
-                                })
-                                .catch((err) => {
-                                    console.log(err);
-                                })
-                        }}
-                        className='text-sm font-semibold bg-blue-500 text-white rounded-md shadow-md shadow-blue-500 p-1 w-full'>Create Invoice</button>
+                        <button
+                            onClick={() => {
+                                const { _id, createdAt, updatedAt, validity, status, bargainDate, ...salesEntry } = salesBargain;
+                                axios.post(`${server}/sales/invoice/create`, salesEntry)
+                                    .then((res) => {
+                                        console.log(res);
+                                    })
+                                    .catch((err) => {
+                                        console.log(err);
+                                    })
+                            }}
+                            className='text-sm font-semibold bg-blue-500 text-white rounded-md shadow-md shadow-blue-500 p-1 w-full'>Create Invoice</button>
                     </div>
                 </div>
             }

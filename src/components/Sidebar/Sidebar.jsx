@@ -73,17 +73,17 @@ const Sidebar = () => {
     }>
       <div className='flex gap-2 items-center'>
         <div className={
-          sidebar ? 'bg-blue-600 w-7 p-1 rounded-md' :
-            'bg-blue-600 w-7 p-1 rounded-md hidden md:flex'
+          sidebar ? 'bg-blue-600 w-14 p-1 rounded-sm' :
+            'bg-blue-600 w-14 p-1 rounded-sm hidden md:flex'
         }>
-          <Image src={"/dashboard-icons/database-icon.png"} width={100} height={100} alt='site logo' />
+          <Image src={"/dashboard-icons/database-icon.png"} width={200} height={200} alt='site logo' />
         </div>
         <h2
           className={
-            sidebar ? 'text-2xl font-bold' :
-              'text-2xl font-bold hidden md:flex'
+            sidebar ? 'text-lg leading-5 font-bold' :
+              'text-lg leading-5 font-bold hidden md:flex'
           }
-        >CMS</h2>
+        >Oil Trade</h2>
         <div
         className={`w-full flex ${sidebar ? 'justify-end' : 'justify-center mt-3'}`}
           onClick={() => {

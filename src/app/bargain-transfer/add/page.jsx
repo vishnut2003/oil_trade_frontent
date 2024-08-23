@@ -92,6 +92,10 @@ const BargainTransferAdd = () => {
                                                 return bargains;
                                             }
 
+                                        }).filter((bargain) => {
+                                            if(bargain.status !== 'complete') {
+                                                return bargain;
+                                            }
                                         }).map((bargains) => (
                                             <div
                                                 onClick={() => {
