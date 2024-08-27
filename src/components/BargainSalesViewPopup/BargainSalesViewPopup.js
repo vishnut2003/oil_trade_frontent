@@ -7,6 +7,8 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
     const server = domainName();
     const [salesBargain, setSalesBargain] = useState({});
     const [bargainDeleteSuccess, setBargainDeleteSuccess] = useState('');
+    const [bargainCreateSuccess, setBargainCreateSuccess] = useState('');
+    const [bargainCreateErr, setBargainCreateErr] = useState('');
     const [qtyPopup, setQtyPopup] = useState(false);
 
     useEffect(() => {
@@ -170,10 +172,12 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
                                 const { _id, createdAt, updatedAt, validity, status, bargainDate, ...salesEntry } = salesBargain;
                                 axios.post(`${server}/sales/invoice/create`, salesEntry)
                                     .then((res) => {
-                                        console.log(res);
+                                        setBargainCreateSuccess(res.data);
+                                        setTimeout(() => setBargainCreateSuccess(''), 5000);
                                     })
                                     .catch((err) => {
-                                        console.log(err);
+                                        setBargainCreateErr(err.response.data);
+                                        setTimeout(() => setBargainCreateErr(''), 5000);
                                     })
                             }}
                             className='text-sm font-semibold bg-blue-500 text-white rounded-md shadow-md shadow-blue-500 p-1 w-full'>Create Invoice</button>
@@ -186,6 +190,18 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
                     bargainDeleteSuccess &&
                     <div>
                         <p className='py-2 px-4 bg-green-200 text-green-600 text-sm font-semibold rounded-md'>{bargainDeleteSuccess}</p>
+                    </div>
+                }
+                {
+                    bargainCreateSuccess &&
+                    <div>
+                        <p className='py-2 px-4 bg-green-200 text-green-600 text-sm font-semibold rounded-md'>{bargainCreateSuccess}</p>
+                    </div>
+                }
+                {
+                    bargainCreateErr &&
+                    <div>
+                        <p className='py-2 px-4 bg-red-200 text-red-600 text-sm font-semibold rounded-md'>{bargainCreateErr}</p>
                     </div>
                 }
             </div>
