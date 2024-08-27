@@ -12,6 +12,7 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
 
     // qty selection for convert to purchase invoice
     const [purchaseInvoiceQty, setPurchaseInvoiceQty] = useState({});
+    const [purchaseInvoiceTotal, setPurchaseInvoiceTotal] = useState(0);
     const [invoiceCreateErr, setInvoiceCreateErr] = useState('');
     const [invoiceCreateSuccess, setInvoiceCreateSuccess] = useState('');
 
@@ -26,6 +27,15 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
             })
             .catch((err) => {
                 console.log(err)
+            })
+
+        // bargain purchase total
+        axios.post(`${server}/total/bargain-purchase`, {bargainId: purchase._id})
+            .then((res) => {
+                setPurchaseInvoiceTotal(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
             })
     }, [server, purchase])
 
@@ -99,6 +109,12 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
                                 <td className='py-2 px-3'>{product.weightInMT}</td>
                             </tr>
                         ))}
+                        <tr>
+                            <td className='py-2 px-3'></td>
+                            <td className='py-2 px-3'></td>
+                            <td className='py-2 px-3 text-sm font-semibold'>Total</td>
+                            <td className='py-2 px-3 text-sm font-semibold'>&#8377; {purchaseInvoiceTotal}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

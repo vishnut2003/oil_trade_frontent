@@ -26,7 +26,7 @@ const Sidebar = () => {
     },
     {
       title: 'Bargain Trasfer',
-      path: '/bargain-transfer',
+      path: '/bargain-transfer/add',
       icon: faPercentage,
       id: 3
     },

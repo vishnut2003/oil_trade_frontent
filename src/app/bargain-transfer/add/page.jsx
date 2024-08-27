@@ -10,6 +10,7 @@ const BargainTransferAdd = () => {
 
     const server = domainName();
     const [submitError, setSubmitError] = useState('');
+    const [submitSuccess, setSubmitSuccess] = useState('');
 
     const [purchaseBargains, setPurchaseBargains] = useState([]);
     const [bargainNoDropdown, setBargainNoDropdown] = useState(false);
@@ -37,11 +38,16 @@ const BargainTransferAdd = () => {
         e.preventDefault();
 
         // Validate
-        if(transferEntry.bargainNo.length === 0) return setSubmitError('Select against bargain No.');
+        if(transferEntry.bargainNo.length === 0) {
+            setSubmitError('Select against bargain No.');
+            setTimeout(() => setSubmitError(''), 5000);
+            return;
+        }
         
         axios.post(`${server}/bargain-transfer/create`, transferEntry)
             .then((res) => {
-                console.log(res);
+                setSubmitSuccess(res.data);
+                setTimeout(() => setSubmitSuccess(''), 5000);
             })
             .catch((err) => {
                 console.log(err);
@@ -217,6 +223,16 @@ const BargainTransferAdd = () => {
                         <button
                             className='text-sm font-semibold bg-blue-500 text-white p-3 w-full rounded-md shadow-md shadow-blue-400'
                             type='submit'>Create Transfer Bargain</button>
+                    </div>
+                    <div>
+                        {
+                            submitError && 
+                            <p className='text-sm py-2 px-3 rounded-md bg-red-100 text-red-500 font-semibold'>{submitError}</p>
+                        }
+                        {
+                            submitSuccess && 
+                            <p className='text-sm py-2 px-3 rounded-md bg-green-100 text-green-500 font-semibold'>{submitSuccess}</p>
+                        }
                     </div>
                 </form>
             </div >

@@ -6,6 +6,7 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
 
     const server = domainName();
     const [salesBargain, setSalesBargain] = useState({});
+    const [salesTotal, setSalesTotal] = useState(0);
     const [bargainDeleteSuccess, setBargainDeleteSuccess] = useState('');
     const [bargainCreateSuccess, setBargainCreateSuccess] = useState('');
     const [bargainCreateErr, setBargainCreateErr] = useState('');
@@ -19,10 +20,18 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
             .catch((err) => {
                 console.log(err);
             })
+
+        axios.post(`${server}/total/bargain-sales`, { bargainId: salesBargainId })
+            .then((res) => {
+                setSalesTotal(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            })
     }, [salesBargainId, server])
 
     return (
-        <div className='p-5 bg-white w-full max-w-xl rounded-md flex flex-col gap-3 min-w-96'>
+        <div className='p-5 bg-white w-full max-w-xl rounded-md flex flex-col gap-3 min-w-96 max-h-svh overflow-auto'>
             {children}
             <div className='flex flex-nowrap justify-between'>
                 <div className='text-sm'>
@@ -87,18 +96,22 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
                                 <td className='py-2 px-3'>{product.qty}</td>
                             </tr>
                         ))}
+                        <tr>
+                            <td className='py-2 px-3'></td>
+                            <td className='py-2 px-3 font-semibold'>Discount</td>
+                            <td className='py-2 px-3 font-semibold'>{salesBargain.discount}</td>
+                        </tr>
+                        <tr>
+                            <td className='py-2 px-3'></td>
+                            <td className='py-2 px-3 font-semibold'>Total</td>
+                            <td className='py-2 px-3 font-semibold'>&#8377; {salesTotal}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
 
             <div className='flex flex-nowrap justify-between'>
-                <div className='text-sm'>
-                    <b>Discount</b>
-                    {
-                        salesBargain.discount && <p className='font-semibold text-left'>{salesBargain.discount} &#8377;</p>
-                    }
-                </div>
-                <div className='text-sm text-right'>
+                <div className='text-sm text-left'>
                     <b>Status</b>
                     {
                         salesBargain.status === 'pending' && <p className='text-sm text-red-500 font-semibold'>{salesBargain.status}</p>
@@ -143,7 +156,7 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
             {
                 qtyPopup &&
                 <div className='w-max fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-md drop-shadow-2xl p-3 flex flex-col gap-2 border border-slate-200'>
-                    <div className='flex flex-nowrap justify-center items-center gap-4'>
+                    <div className='flex flex-nowrap justify-between items-center gap-4'>
                         <h2 className='text-base font-semibold'>Enter Quantity</h2>
                         <p
                             onClick={() => setQtyPopup(false)}
@@ -182,6 +195,18 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
                             }}
                             className='text-sm font-semibold bg-blue-500 text-white rounded-md shadow-md shadow-blue-500 p-1 w-full'>Create Invoice</button>
                     </div>
+                    {
+                        bargainCreateErr &&
+                        <div>
+                            <p className='py-2 px-4 bg-red-200 text-red-600 text-sm font-semibold rounded-md'>{bargainCreateErr}</p>
+                        </div>
+                    }
+                    {
+                        bargainCreateSuccess &&
+                        <div>
+                            <p className='py-2 px-4 bg-green-200 text-green-600 text-sm font-semibold rounded-md'>{bargainCreateSuccess}</p>
+                        </div>
+                    }
                 </div>
             }
 
@@ -192,18 +217,7 @@ const BargainSalesViewPopup = ({ children, salesBargainId }) => {
                         <p className='py-2 px-4 bg-green-200 text-green-600 text-sm font-semibold rounded-md'>{bargainDeleteSuccess}</p>
                     </div>
                 }
-                {
-                    bargainCreateSuccess &&
-                    <div>
-                        <p className='py-2 px-4 bg-green-200 text-green-600 text-sm font-semibold rounded-md'>{bargainCreateSuccess}</p>
-                    </div>
-                }
-                {
-                    bargainCreateErr &&
-                    <div>
-                        <p className='py-2 px-4 bg-red-200 text-red-600 text-sm font-semibold rounded-md'>{bargainCreateErr}</p>
-                    </div>
-                }
+
             </div>
         </div>
     )

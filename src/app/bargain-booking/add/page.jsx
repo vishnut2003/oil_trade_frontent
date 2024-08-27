@@ -38,7 +38,7 @@ const salesBargainAdd = () => {
         products: [],
         bargainNo: `BRGNO/${new Date().toISOString().substring(0, 10).split('-').join('')}/${Math.floor(100000 + Math.random() * 900000)}`,
         client: {},
-        discount: '',
+        discount: '0',
         validity: new Date().toISOString().substring(0, 10),
         bargainDate: new Date().toISOString().substring(0, 10),
         deliveryTerms: '',
@@ -84,7 +84,7 @@ const salesBargainAdd = () => {
             })
     }, [server])
 
-    const submitSalesBargain = (e) => {
+    const submitSalesBargain = async (e) => {
         e.preventDefault();
         console.log(salesBargainForm)
 
@@ -418,7 +418,6 @@ const salesBargainAdd = () => {
                             <input
                                 className='p-2 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2'
                                 type="number"
-                                required
                                 value={salesBargainForm.discount}
                                 onChange={enterSalesBargainFormData}
                                 name="discount"

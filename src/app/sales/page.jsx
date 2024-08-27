@@ -60,14 +60,21 @@ const Sales = () => {
                       <SalesInvoiceViewPopup invoiceId={invoice._id}>
                         <div className='flex flex-nowrap justify-between items-center gap-3'>
                           <h2 className='text-base font-semibold'>Sales Invoice</h2>
-                          <p 
-                          onClick={() => {
-                            setInvoicePopup({
-                              ...invoicePopup,
-                              [invoice._id]: false
-                            })
-                          }}
-                          className='text-sm font-semibold text-red-500 cursor-pointer'>Close</p>
+                          <p
+                            onClick={() => {
+                              setInvoicePopup({
+                                ...invoicePopup,
+                                [invoice._id]: false
+                              })
+                              axios.get(`${server}/sales/invoice/get-all`)
+                                .then((res) => {
+                                  setSalesInvoices(res.data);
+                                })
+                                .catch((err) => {
+                                  console.log(err);
+                                })
+                            }}
+                            className='text-sm font-semibold text-red-500 cursor-pointer'>Close</p>
                         </div>
                       </SalesInvoiceViewPopup>
                     </div>

@@ -5,13 +5,13 @@ import React, { useEffect, useState } from 'react'
 const PurchaseInvoiceViewPopup = ({ purchase, children }) => {
     const server = domainName();
     const [locationDetails, setLocationDetails] = useState('')
+    const [purchaseInvoiceTotal, setPurchaseInvoiceTotal] = useState(0);
 
     const [purchaseDeletedSuccess, setPurchaseDeletedSuccess] = useState('')
 
     useEffect(() => {
         axios.post(`${server}/purchase/location/get-one`, { locationId: purchase.locationId })
             .then((res) => {
-                console.log(res)
                 if (!res.data) {
                     setLocationDetails('')
                 } else {
@@ -20,6 +20,15 @@ const PurchaseInvoiceViewPopup = ({ purchase, children }) => {
             })
             .catch((err) => {
                 console.log(err)
+            })
+
+        // calculate purchase total
+        axios.post(`${server}/total/purchase-invoice`, {purchaseId: purchase._id})
+            .then((res) => {
+                setPurchaseInvoiceTotal(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
             })
     }, [server, purchase])
 
@@ -95,6 +104,11 @@ const PurchaseInvoiceViewPopup = ({ purchase, children }) => {
                                 <td className='py-2 px-3'>{product.purchaseQty}</td>
                             </tr>
                         ))}
+                        <tr>
+                            <td className='py-2 px-3 text-sm'></td>
+                            <td className='py-2 px-3 text-sm font-semibold'>Total</td>
+                            <td className='py-2 px-3 text-sm font-semibold'>&#8377; {purchaseInvoiceTotal}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
