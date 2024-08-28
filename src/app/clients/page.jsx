@@ -1,6 +1,7 @@
 'use client';
 
 import AddClient from '@/components/AddClient/AddClient'
+import ClientEditPopup from '@/components/ClientEditPopup/ClientEditPopup';
 import domainName from '@/domainName';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
@@ -9,6 +10,8 @@ const Clients = () => {
 
   const server = domainName();
   const [clients, setClients] = useState([]);
+  const [clientEditPopup, setClientEditPopup] = useState({})
+
   useEffect(() => {
     axios.get(`${server}/clients/get-all`)
       .then((res) => {
@@ -35,11 +38,11 @@ const Clients = () => {
       <div className="py-4 flex justify-start max-w-full">
         <div className='w-full max-w-full'>
           <div>
-            <button 
-            onClick={() => {
-              refreshClientsTable();
-            }}
-            className='text-xs bg-blue-600 text-white py-2 px-3 rounded-md mb-2'>Refresh</button>
+            <button
+              onClick={() => {
+                refreshClientsTable();
+              }}
+              className='text-xs bg-blue-600 text-white py-2 px-3 rounded-md mb-2'>Refresh</button>
           </div>
           <div className='max-w-full md:max-w-max'>
             <table className="w-full text-md md:bg-white md:shadow-md rounded mb-4">
@@ -64,7 +67,29 @@ const Clients = () => {
                       <td className="p-2 md:py-3 md:px-5">{client.email}</td>
                       <td className="p-2 md:py-3 md:px-5 flex justify-start">
                         <button type="button" className="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">History</button>
-                        <button type="button" className="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">Edit</button>
+                        <button 
+                        onClick={() => setClientEditPopup({
+                          ...clientEditPopup,
+                          [client._id]: true
+                        })}
+                        type="button" className="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">Edit</button>
+                        {/* Client edit */}
+                        {
+                          clientEditPopup[client._id] &&
+                          <div className='fixed top-0 left-0 w-full h-full flex justify-center items-center'>
+                            <ClientEditPopup client={client}>
+                              <div className='flex flex-nowrap justify-between items-center gap-4 pb-2 border-b border-slate-300'>
+                                <h2 className='font-semibold'>Edit Client</h2>
+                                <button 
+                                onClick={() => setClientEditPopup({
+                                  ...clientEditPopup,
+                                  [client._id]: false
+                                })}
+                                className='text-sm font-semibold text-red-500'>Close</button>
+                              </div>
+                            </ClientEditPopup>
+                          </div>
+                        }
 
                         <button
                           type="button"

@@ -50,12 +50,13 @@ const BargainTransferAdd = () => {
                 setTimeout(() => setSubmitSuccess(''), 5000);
             })
             .catch((err) => {
-                console.log(err);
+                setSubmitError(err.response.data);
+                setTimeout(() => setSubmitError(''), 5000);
             })
     }
 
     return (
-        <div className='flex justify-center md:justify-start'>
+        <div className='flex justify-center md:justify-start pb-10'>
             <div className='w-full max-w-xl flex flex-col gap-4'>
                 <h2>Add Bargain Transfer</h2>
                 <form className='w-full flex flex-col gap-2' onSubmit={submitTransferEntry}>

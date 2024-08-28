@@ -1,6 +1,9 @@
 import domainName from '@/domainName'
+import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
+import OldBargainViewPopup from '../OldBargainViewPopup/OldBargainViewPopup';
 
 const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
     const server = domainName();
@@ -9,6 +12,7 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
     const [purchaseDeletedSuccess, setPurchaseDeletedSuccess] = useState('')
 
     const [convertToPurchasePopup, setConvertToPurchasePopup] = useState(false)
+    const [oldBargainPopup, setOldBargainPopup] = useState(false);
 
     // qty selection for convert to purchase invoice
     const [purchaseInvoiceQty, setPurchaseInvoiceQty] = useState({});
@@ -30,7 +34,7 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
             })
 
         // bargain purchase total
-        axios.post(`${server}/total/bargain-purchase`, {bargainId: purchase._id})
+        axios.post(`${server}/total/bargain-purchase`, { bargainId: purchase._id })
             .then((res) => {
                 setPurchaseInvoiceTotal(res.data);
             })
@@ -118,6 +122,32 @@ const PurchaseViewPopUp = ({ locationId, purchase, children }) => {
                     </tbody>
                 </table>
             </div>
+            {
+                !purchase.oldBargain.nothing &&
+                <div className='text-sm font-semibold text-blue-500 flex gap-1 justify-end items-center'>
+                    <button 
+                    onClick={() => setOldBargainPopup(true)}
+                    >
+                        View Old Bargin
+                        <FontAwesomeIcon icon={faAngleDown} width={'20px'} />
+                    </button>
+                    {
+                        oldBargainPopup &&
+                        <div className='fixed top-0 left-0 w-full h-full flex justify-center items-center'>
+                            <div className='drop-shadow-2xl border border-slate-400 bg-white p-3 rounded-md'>
+                                <OldBargainViewPopup oldBargain={purchase.oldBargain}>
+                                    <div className='flex flex-nowrap gap-3 justify-between border-b border-slate-300 pb-2'>
+                                        <h2 className='text-black font-semibold text-base'>Old Bargain</h2>
+                                        <button 
+                                        onClick={() => setOldBargainPopup(false)}
+                                        className='text-red-500 text-sm font-semibold'>close</button>
+                                    </div>
+                                </OldBargainViewPopup>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
             <div className='flex flex-col md:flex-row justify-between items-center gap-3'>
                 {
                     purchase.status !== 'complete' &&
