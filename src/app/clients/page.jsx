@@ -2,6 +2,7 @@
 
 import AddClient from '@/components/AddClient/AddClient'
 import ClientEditPopup from '@/components/ClientEditPopup/ClientEditPopup';
+import ClientHistoryPopup from '@/components/ClientHistoryPopup/ClientHistoryPopup';
 import domainName from '@/domainName';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
@@ -10,7 +11,8 @@ const Clients = () => {
 
   const server = domainName();
   const [clients, setClients] = useState([]);
-  const [clientEditPopup, setClientEditPopup] = useState({})
+  const [clientEditPopup, setClientEditPopup] = useState({});
+  const [clientHistoryPopup, setClientHistoryPopup] = useState('');
 
   useEffect(() => {
     axios.get(`${server}/clients/get-all`)
@@ -66,26 +68,49 @@ const Clients = () => {
                       <td className="p-2 md:py-3 md:px-5">{client.phoneNumber}</td>
                       <td className="p-2 md:py-3 md:px-5">{client.email}</td>
                       <td className="p-2 md:py-3 md:px-5 flex justify-start">
-                        <button type="button" className="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">History</button>
                         <button 
-                        onClick={() => setClientEditPopup({
-                          ...clientEditPopup,
+                        onClick={() => setClientHistoryPopup({
+                          ...clientHistoryPopup,
                           [client._id]: true
                         })}
-                        type="button" className="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">Edit</button>
+                        type="button" className="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">History</button>
+                        {/* History popup */}
+                        {
+                          clientHistoryPopup[client._id] &&
+                          <div className='fixed top-0 left-0 w-full h-full flex justify-center items-center'>
+                            <ClientHistoryPopup clientId={client._id}>
+                              <div className='flex gap-3 justify-center items-center border-b border-slate-300 pb-2'>
+                                <h2 className='text-base font-bold'>Client History</h2>
+                                <button 
+                                onClick={() => setClientHistoryPopup({
+                                  ...clientHistoryPopup,
+                                  [client._id]: false
+                                })}
+                                className='text-sm text-red-600 font-semibold'>Close</button>
+                              </div>
+                            </ClientHistoryPopup>
+                          </div>
+                        }
+
+                        <button
+                          onClick={() => setClientEditPopup({
+                            ...clientEditPopup,
+                            [client._id]: true
+                          })}
+                          type="button" className="mr-3 text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline">Edit</button>
                         {/* Client edit */}
                         {
                           clientEditPopup[client._id] &&
-                          <div className='fixed top-0 left-0 w-full h-full flex justify-center items-center'>
+                          <div className='fixed top-0 left-0 w-full h-full flex justify-center items-center p-2'>
                             <ClientEditPopup client={client}>
                               <div className='flex flex-nowrap justify-between items-center gap-4 pb-2 border-b border-slate-300'>
-                                <h2 className='font-semibold'>Edit Client</h2>
-                                <button 
-                                onClick={() => setClientEditPopup({
-                                  ...clientEditPopup,
-                                  [client._id]: false
-                                })}
-                                className='text-sm font-semibold text-red-500'>Close</button>
+                                <h2 className='font-semibold text-base'>Edit Client</h2>
+                                <button
+                                  onClick={() => setClientEditPopup({
+                                    ...clientEditPopup,
+                                    [client._id]: false
+                                  })}
+                                  className='text-sm font-semibold text-red-500'>Close</button>
                               </div>
                             </ClientEditPopup>
                           </div>

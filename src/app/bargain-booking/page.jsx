@@ -21,7 +21,7 @@ const BargainBooking = () => {
   const [locationChangesSuccess, setLocationChangesSuccess] = useState('');
 
   const [salesBargains, setSalesBargains] = useState([]);
-  const [salesViewPopup, setSalesViewPopup] = useState(false)
+  const [salesViewPopup, setSalesViewPopup] = useState({})
 
   useEffect(() => {
     axios.get(`${server}/sales/location/get-all`)
@@ -92,10 +92,13 @@ const BargainBooking = () => {
                     </td>
                     <td className='py-2 px-4 text-sm'>
                       <FontAwesomeIcon
-                        onClick={() => setSalesViewPopup(true)}
+                        onClick={() => setSalesViewPopup({
+                          ...salesViewPopup,
+                          [bargain._id]: true
+                        })}
                         icon={faAngleDown} width={'15px'} className='cursor-pointer' />
                       {
-                        salesViewPopup &&
+                        salesViewPopup[bargain._id] &&
                         <div className='fixed top-0 left-0 w-full h-full flex justify-center items-center'>
                           <div className='p-2 drop-shadow-2xl bg-white rounded-md'>
                             <BargainSalesViewPopup salesBargainId={bargain._id}>
@@ -106,7 +109,10 @@ const BargainBooking = () => {
                                 <div>
                                   <p
                                     onClick={() => {
-                                      setSalesViewPopup(false)
+                                      setSalesViewPopup({
+                                        ...salesViewPopup,
+                                        [bargain._id]: false
+                                      })
                                       axios.get(`${server}/sales/bargain/get-all`)
                                         .then((res) => {
                                           setSalesBargains(res.data);

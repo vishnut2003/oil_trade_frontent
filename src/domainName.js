@@ -1,3 +1,3 @@
 export default function domainName() {
-    return 'http://localhost:3500'
+    return 'http://192.168.68.112:3500'
 }

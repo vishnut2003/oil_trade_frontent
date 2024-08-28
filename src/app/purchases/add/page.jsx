@@ -1,7 +1,7 @@
 'use client';
 
 import domainName from '@/domainName';
-import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faAngleUp, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
@@ -81,49 +81,55 @@ const PurchaseAdd = () => {
                                         bargainDate: e.target.value
                                     })
                                 }}
-                                className='px-5 py-2 bg-white rounded-sm text-sm border-b border-slate-300 text-slate-500' />
+                                className='px-3 py-2 bg-white rounded-md text-sm border-2 border-blue-500 text-slate-500' />
                         </div>
                         <div className='flex flex-col gap-1 w-1/2'>
                             <label className='text-xs'>Current Date</label>
-                            <input type="date" required disabled className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-slate-500' value={new Date().toISOString().substring(0, 10)} />
+                            <input type="date" required disabled className='px-3 py-2 rounded-md text-sm bg-slate-200 text-slate-500' value={new Date().toISOString().substring(0, 10)} />
                         </div>
                     </div>
                     <div>
                         <div className='relative'>
                             <label className='text-xs'>Products</label>
-                            <div
-                                onClick={() => {
-                                    setProductPopup(!productPopup)
-                                }}
-                                className='p-3 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2' >
-                                {
-                                    purchaseForm.products.length > 0 ?
-                                        purchaseForm.products.map((product) => (
-                                            <span className='bg-slate-200 px-3 py-1 rounded-md' key={product._id}>
-                                                {product.name}
-                                                <FontAwesomeIcon
-                                                    onClick={() => {
-                                                        setPurchaseForm(prevData => {
-                                                            const latestProductList = prevData.products.filter((filterProduct) => {
-                                                                if (filterProduct._id !== product._id) {
-                                                                    return filterProduct
+                            <div className='px-3 py-2 rounded-md text-sm border-2 bg-white border-blue-500 text-slate-500 flex flex-wrap gap-2 justify-between items-center' >
+                                <div className='flex flex-wrap gap-1'>
+                                    {
+                                        purchaseForm.products.length > 0 ?
+                                            purchaseForm.products.map((product) => (
+                                                <span className='bg-blue-500 text-white px-3 py-1 rounded-md' key={product._id}>
+                                                    {product.name}
+                                                    <FontAwesomeIcon
+                                                        onClick={() => {
+                                                            setPurchaseForm(prevData => {
+                                                                const latestProductList = prevData.products.filter((filterProduct) => {
+                                                                    if (filterProduct._id !== product._id) {
+                                                                        return filterProduct
+                                                                    }
+                                                                })
+                                                                return {
+                                                                    ...prevData,
+                                                                    products: latestProductList
                                                                 }
                                                             })
-                                                            return {
-                                                                ...prevData,
-                                                                products: latestProductList
-                                                            }
-                                                        })
-                                                    }}
-                                                    className='text-red-600 ml-2 cursor-pointer'
-                                                    width={10}
-                                                    icon={faXmark} />
+                                                        }}
+                                                        className='text-white ml-2 cursor-pointer'
+                                                        width={10}
+                                                        icon={faXmark} />
+                                                </span>
+                                            )) :
+                                            <span className='rounded-md'>
+                                                Select products
                                             </span>
-                                        )) :
-                                        <span className=' px-3 py-1 rounded-md'>
-                                            Select products
-                                        </span>
-                                }
+                                    }
+                                </div>
+                                    <div>
+                                        <FontAwesomeIcon 
+                                        onClick={() => {
+                                            setProductPopup(!productPopup)
+                                        }}
+                                        icon={faAngleUp} width={'20px'} 
+                                        className={`cursor-pointer text-blue-500 ${productPopup ? 'rotate-0' : 'rotate-180'}`} />
+                                    </div>
                             </div>
                             <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full  shadow-md z-10 ${productPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
                                 <input
@@ -133,7 +139,7 @@ const PurchaseAdd = () => {
                                         setProductSearch(e.target.value)
                                     }}
                                     placeholder='Search product'
-                                    className='border border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
+                                    className='border-2 border-slate-300 rounded-md w-full px-5 py-2 text-sm text-slate-500' />
                                 <ul className='flex gap-1 flex-col'>
                                     {products.filter((product) => {
                                         const searchText = productSearch.toLocaleLowerCase()
@@ -147,7 +153,7 @@ const PurchaseAdd = () => {
                                             onClick={() => {
                                                 let productExist = false;
                                                 purchaseForm.products.map((purchaseProduct) => {
-                                                    if(purchaseProduct._id === product._id) {
+                                                    if (purchaseProduct._id === product._id) {
                                                         productExist = true
                                                     }
                                                 })
@@ -171,10 +177,15 @@ const PurchaseAdd = () => {
                                             <div className='flex flex-col gap-1'>
                                                 <p className='text-sm font-semibold text-black'>{product.name}</p>
                                             </div>
-                                            {/* {
-                                                purchaseForm.products.includes(product.name) &&
-                                                <FontAwesomeIcon icon={faCheck} width={15} className='text-blue-600' />
-                                            } */}
+                                            {
+                                                purchaseForm.products.map((purchaseProduct) => {
+                                                    if (purchaseProduct._id === product._id) {
+                                                        return (
+                                                            <FontAwesomeIcon icon={faCheck} width={15} className='text-blue-600' />
+                                                        )
+                                                    }
+                                                })
+                                            }
                                         </li>
                                     ))}
                                 </ul>
@@ -185,8 +196,8 @@ const PurchaseAdd = () => {
                         purchaseForm.products.length !== 0 &&
                         <div className='flex flex-col gap-2 border border-slate-200 p-3 rounded-md bg-white'>
                             {purchaseForm.products.map((product) => (
-                                <div className='flex flex-col md:flex-row flex-nowrap justify-between gap-2 md:items-center border-b border-slate-200 pb-2' key={product._id}>
-                                    <p className='text-sm'>{product.name}</p>
+                                <div className='flex flex-col md:flex-row flex-nowrap justify-between gap-2 md:items-center border-b border-blue-300 pb-3' key={product._id}>
+                                    <p className='text-base font-extrabold capitalize'>{product.name}</p>
                                     <div className='flex flex-nowrap gap-2'>
                                         <input
                                             type="number"
@@ -197,7 +208,7 @@ const PurchaseAdd = () => {
                                                 setPurchaseForm(formData => {
                                                     let itemIndex;
                                                     formData.products.filter((filterProduct, index) => {
-                                                        if(filterProduct._id === product._id) {
+                                                        if (filterProduct._id === product._id) {
                                                             itemIndex = index
                                                         }
                                                     })
@@ -212,7 +223,7 @@ const PurchaseAdd = () => {
                                                     return updatedFormData
                                                 })
                                             }}
-                                            className='max-w-24 w-full py-1 px-3 text-sm border border-slate-200 rounded-md'
+                                            className='max-w-24 w-full py-2 px-3 text-sm border-2 border-blue-500 rounded-md'
                                         />
 
                                         <input
@@ -224,7 +235,7 @@ const PurchaseAdd = () => {
                                                 setPurchaseForm(formData => {
                                                     let itemIndex;
                                                     formData.products.filter((filterProduct, index) => {
-                                                        if(filterProduct._id === product._id) {
+                                                        if (filterProduct._id === product._id) {
                                                             itemIndex = index
                                                         }
                                                     })
@@ -239,9 +250,9 @@ const PurchaseAdd = () => {
                                                     return updatedFormData
                                                 })
                                             }}
-                                            className='max-w-24 w-full py-1 px-3 text-sm border border-slate-200 rounded-md'
+                                            className='max-w-24 w-full py-1 px-3 text-sm border-2 border-blue-500 rounded-md'
                                         />
-                                        
+
                                         <input
                                             type="number"
                                             required
@@ -251,7 +262,7 @@ const PurchaseAdd = () => {
                                                 setPurchaseForm(formData => {
                                                     let itemIndex;
                                                     formData.products.filter((filterProduct, index) => {
-                                                        if(filterProduct._id === product._id) {
+                                                        if (filterProduct._id === product._id) {
                                                             itemIndex = index
                                                         }
                                                     })
@@ -266,7 +277,7 @@ const PurchaseAdd = () => {
                                                     return updatedFormData
                                                 })
                                             }}
-                                            className='max-w-24 w-full py-1 px-3 text-sm border border-slate-200 rounded-md'
+                                            className='max-w-24 w-full py-1 px-3 text-sm border-2 border-blue-500 rounded-md'
                                         />
                                     </div>
                                 </div>
@@ -286,22 +297,23 @@ const PurchaseAdd = () => {
                                     })
                                 }}
                                 type="text"
-                                className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
+                                className='px-5 py-2 rounded-md text-sm border-2 border-blue-500 text-black' />
                         </div>
                     </div>
                     <div>
                         <div className='relative'>
                             <label className='text-xs'>Location</label>
-                            <div
-                                onClick={() => {
-                                    setLocationPopup(!locationPopup)
-                                }}
-                                className='p-3 rounded-sm text-sm border-b bg-white border-slate-300 text-slate-500 flex flex-wrap gap-2' >
+                            <div className='py-2 px-3 rounded-md text-sm border-2 bg-white border-blue-500 text-slate-500 flex flex-wrap gap-2 justify-between items-center' >
                                 {
                                     purchaseForm.location ?
                                         <p>{purchaseForm.location.location}</p> :
                                         <p>Select Location</p>
                                 }
+                                <FontAwesomeIcon
+                                onClick={() => {
+                                    setLocationPopup(!locationPopup)
+                                }}
+                                icon={faAngleUp} width={'20px'} className={`text-blue-500 cursor-pointer ${ locationPopup ? 'rotate-0' : 'rotate-180'}`}/>
                             </div>
                             <div className={`bg-white max-h-52 overflow-auto scroll-smooth transition-all flex gap-3 flex-col absolute w-full shadow-md ${locationPopup ? 'h-52 p-3 opacity-100' : 'h-0 opacity-0'}`}>
                                 <input
@@ -342,56 +354,10 @@ const PurchaseAdd = () => {
                             </div>
                         </div>
                     </div>
-                    {/* <div>
-                        <div className='flex flex-col gap-1'>
-                            <label className='text-xs'>Rate/Unit</label>
-                            <input 
-                            value={purchaseForm.rate}
-                            onChange={(e) => {
-                                setPurchaseForm({
-                                    ...purchaseForm,
-                                    rate: e.target.value
-                                })
-                            }}
-                            type="number" 
-                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
-                        </div>
-                    </div> */}
-
-                    {/* <div>
-                        <div className='flex flex-col gap-1'>
-                            <label className='text-xs'>Quantity</label>
-                            <input 
-                            value={purchaseForm.qty}
-                            onChange={(e) => {
-                                setPurchaseForm({
-                                    ...purchaseForm,
-                                    qty: e.target.value
-                                })
-                            }}
-                            type="number" 
-                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
-                        </div>
-                    </div> */}
-
-                    {/* <div> 
-                        <div className='flex flex-col gap-1'>
-                            <label className='text-xs'>Weight in MT</label>
-                            <input 
-                            value={purchaseForm.wightInMT}
-                            onChange={(e) => {
-                                setPurchaseForm({
-                                    ...purchaseForm,
-                                    wightInMT: e.target.value
-                                })
-                            }}
-                            type="number" 
-                            className='px-5 py-2 rounded-sm text-sm border-b border-slate-300 text-black' />
-                        </div>
-                    </div> */}
+                    
                     <button className='px-3 py-2 bg-blue-600 text-white text-sm shadow-md shadow-blue-600/50 rounded-md flex justify-center items-center gap-2'>
                         {
-                            purchaseCreateLoading && 
+                            purchaseCreateLoading &&
                             <div className='w-4 h-4 rounded-full border border-b-0 border-r-0 animate-spin'></div>
                         }
                         Create Purchase
