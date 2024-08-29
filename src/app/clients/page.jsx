@@ -79,7 +79,7 @@ const Clients = () => {
                           clientHistoryPopup[client._id] &&
                           <div className='fixed top-0 left-0 w-full h-full flex justify-center items-center'>
                             <ClientHistoryPopup clientId={client._id}>
-                              <div className='flex gap-3 justify-center items-center border-b border-slate-300 pb-2'>
+                              <div className='flex gap-3 justify-between items-center border-b border-slate-300 pb-2'>
                                 <h2 className='text-base font-bold'>Client History</h2>
                                 <button 
                                 onClick={() => setClientHistoryPopup({
