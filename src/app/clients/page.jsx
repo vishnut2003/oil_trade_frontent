@@ -36,6 +36,7 @@ const Clients = () => {
 
   return (
     <div>
+      <h2 className="text-lg font-bold mb-2">Clients</h2>
       <AddClient />
       <div className="py-4 flex justify-start max-w-full">
         <div className='w-full max-w-full'>

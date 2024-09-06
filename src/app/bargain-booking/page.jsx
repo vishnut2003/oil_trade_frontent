@@ -53,6 +53,7 @@ const BargainBooking = () => {
 
   return (
     <div className='flex flex-col gap-4 mb-6'>
+      <h2 className="text-lg font-bold">Sales Booking</h2>
       <div className='flex gap-3'>
         <Link href={'/bargain-booking/add'}>
           <button className='px-3 py-2 bg-blue-600 text-white text-sm shadow-md shadow-blue-600/50 rounded-md'>Add Bargain Sales</button>
