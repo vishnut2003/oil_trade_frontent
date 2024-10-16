@@ -23,7 +23,7 @@ const OverviewTotals = () => {
     <div className="flex gap-4">
 
         {/* Bargain Purchase */}
-        <div className="flex flex-nowrap gap-4 text-left py-3 px-6 rounded-md shadow-md hover:shadow-lg cursor-pointer transition-all">
+        <div className="flex flex-nowrap gap-4 text-left py-3 px-6 rounded-md shadow-md hover:shadow-lg cursor-pointer transition-all bg-white">
             <div className="flex items-center">
                 <FontAwesomeIcon icon={faCartShopping} width={'25px'} className="text-blue-600"/>
             </div>
@@ -35,7 +35,7 @@ const OverviewTotals = () => {
         </div>
         
         {/* Purchase */}
-        <div className="flex flex-nowrap gap-4 text-left py-3 px-6 rounded-md shadow-md hover:shadow-lg cursor-pointer transition-all">
+        <div className="flex flex-nowrap gap-4 text-left py-3 px-6 rounded-md shadow-md hover:shadow-lg cursor-pointer transition-all bg-white">
             <div className="flex items-center">
                 <FontAwesomeIcon icon={faCartShopping} width={'25px'} className="text-blue-600"/>
             </div>
@@ -47,7 +47,7 @@ const OverviewTotals = () => {
         </div>
         
         {/* Bargain Sales */}
-        <div className="flex flex-nowrap gap-4 text-left py-3 px-6 rounded-md shadow-md hover:shadow-lg cursor-pointer transition-all">
+        <div className="flex flex-nowrap gap-4 text-left py-3 px-6 rounded-md shadow-md hover:shadow-lg cursor-pointer transition-all bg-white">
             <div className="flex items-center">
                 <FontAwesomeIcon icon={faCartShopping} width={'25px'} className="text-blue-600"/>
             </div>
@@ -59,7 +59,7 @@ const OverviewTotals = () => {
         </div>
         
         {/* Sales */}
-        <div className="flex flex-nowrap gap-4 text-left py-3 px-6 rounded-md shadow-md hover:shadow-lg cursor-pointer transition-all">
+        <div className="flex flex-nowrap gap-4 text-left py-3 px-6 rounded-md shadow-md hover:shadow-lg cursor-pointer transition-all bg-white">
             <div className="flex items-center">
                 <FontAwesomeIcon icon={faCartShopping} width={'25px'} className="text-blue-600"/>
             </div>
